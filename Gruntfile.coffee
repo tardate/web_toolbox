@@ -6,10 +6,6 @@ module.exports = (grunt)->
       coffee: {
         files: ['src/javascripts/**/*.coffee'],
         tasks: ['coffee']
-      },
-      javascript: {
-        files: ["app/javascripts/*.js", "specs/*_spec.js"],
-        tasks: ['test']
       }
     },
     coffee: {
@@ -36,5 +32,5 @@ module.exports = (grunt)->
   grunt.loadNpmTasks('grunt-contrib-watch')
 
   grunt.registerTask('test', ['jasmine'])
-  grunt.registerTask('default', ['test'])
+  grunt.registerTask('default', ['watch'])
 
