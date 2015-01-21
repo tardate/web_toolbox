@@ -22,7 +22,7 @@
   <nav class="navbar navbar-default" role="navigation">
     <div class="container-fluid">
       <div class="navbar-header">
-        <a class="navbar-brand" href="#">My Toolbox</a>
+        <a class="navbar-brand" href="#" data-workspace="WorkspaceComponent">My Toolbox</a>
       </div>
       <ul class="nav navbar-nav">
 
@@ -30,7 +30,7 @@
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Web Dev <span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
             <li data-toggle="tooltip" data-placement="right" title="encode text for HTML or URL embedding">
-              <a href="#">
+              <a href="#" data-workspace="WebEncoderWorkspace">
                 HTML/URL Encoder
               </a>
             </li>
@@ -120,48 +120,23 @@
 
   <div class="container">
     <div class="row">
-      <div class="col-md-12">
+      <div id="workspace" class="col-md-12">
 
-        <div id="workspace" class="panel panel-info">
+        <div class="panel panel-info">
           <div class="panel-heading">
-            <h3 id="workspace_title" class="panel-title">HTML and URI Encoding</h3>
+            <h3 id="workspace_title" class="panel-title"></h3>
           </div>
           <div id="workspace_content" class="panel-body">
-            <form id="webEncoder">
-              <div class="form-group">
-                <label for="inText">source</label>
-                <textarea id="inText" class="form-control" rows=6 wrap="off" placeholder="enter your text, html or javaScript to convert here"></textarea>
-              </div>
-              <div class="form-group">
-                <button class="btn btn-default" data-action="htmlEncode">HTML Encode</button>
-                <button class="btn btn-default" data-action="encodeURI">URI Encode</button>
-                <button class="btn btn-default" data-action="encodeURIComponent">URI Encode Component</button>
-                <button class="btn btn-default" data-action="uriEscape">URI Escape</button>
-                <button class="btn btn-default" data-action="clearBoth">Clear..</button>
-              </div>
-              <div class="form-group">
-                <label for="outText">encoded output</label>
-                <textarea id="outText" class="form-control" rows=6 wrap="off"></textarea>
-              </div>
-            </form>
+
           </div>
         </div>
 
-        <div class="panel panel-info">
+        <div id="workspace_references" class="panel panel-info">
           <div class="panel-heading">
             <h3 class="panel-title">References</h3>
           </div>
           <div class="panel-body">
-            <ul>
-              <li><a href="http://old.stevenharman.net/blog/archive/2007/06/16/url-and-html-encoding-on-the-client-javascript-to-the.aspx">
-                URL and HTML Encoding on the Client? JavaScript to the Rescue!
-              </a></li>
-              <li><a href="http://xkr.us/articles/javascript/encode-compare/">
-                Comparing escape(), encodeURI(), and encodeURIComponent()
-              </a></li>
-              <li><a href="http://stackoverflow.com/questions/24816/escaping-html-strings-with-jquery">
-                Escaping HTML strings with jQuery
-              </a></li>
+            <ul class="reflist">
             </ul>
           </div>
         </div>

@@ -5,8 +5,7 @@ class root.AppController
 
   @activate: ->
     $('[data-toggle="tooltip"]').tooltip(container: 'body')
-    new WebEncoder($('form#webEncoder'))
-
+    root.WorkspaceComponent.activate()
 
 jQuery ->
   new root.AppController.activate()
