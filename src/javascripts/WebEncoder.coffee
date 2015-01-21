@@ -24,3 +24,7 @@ class root.WebEncoder
 
   uriEscape: ->
     @outElement.val(escape(@inElement.val()))
+
+  clearBoth: ->
+    @outElement.val('')
+    @inElement.val('').focus()

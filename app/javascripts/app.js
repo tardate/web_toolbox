@@ -34,6 +34,11 @@
       return this.outElement.val(escape(this.inElement.val()));
     };
 
+    WebEncoder.prototype.clearBoth = function() {
+      this.outElement.val('');
+      return this.inElement.val('').focus();
+    };
+
     return WebEncoder;
 
   })();
