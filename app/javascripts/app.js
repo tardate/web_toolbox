@@ -54,6 +54,9 @@
     function AppController() {}
 
     AppController.activate = function() {
+      $('[data-toggle="tooltip"]').tooltip({
+        container: 'body'
+      });
       return new WebEncoder($('form#webEncoder'));
     };
 

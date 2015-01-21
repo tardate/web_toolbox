@@ -4,6 +4,7 @@ root = exports ? this
 class root.AppController
 
   @activate: ->
+    $('[data-toggle="tooltip"]').tooltip(container: 'body')
     new WebEncoder($('form#webEncoder'))
 
 
