@@ -24,48 +24,109 @@
       <div class="navbar-header">
         <a class="navbar-brand" href="#">My Toolbox</a>
       </div>
+      <ul class="nav navbar-nav">
+
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Web Dev <span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li data-toggle="tooltip" data-placement="right" title="encode text for HTML or URL embedding">
+              <a href="#">
+                HTML/URL Encoder
+              </a>
+            </li>
+            <li class="divider"></li>
+            <li data-toggle="tooltip" data-placement="right" title="Adobe Kuler (now Adobe Color CC) is a great tool for picking/matching colours">
+              <a href="https://color.adobe.com" target="_blank" rel="nofollow">
+                kuler
+                <i class="fa fa-external-link"></i>
+              </a>
+            </li>
+            <li data-toggle="tooltip" data-placement="right" title="Collect, inspect and debug HTTP requests and webhooks">
+              <a href="http://requestb.in/" target="_blank" rel="nofollow">
+                RequestBin
+                <i class="fa fa-external-link"></i>
+              </a>
+            </li>
+          </ul>
+        </li>
+
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Ruby/Rails <span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+              <a href="http://api.rubyonrails.org/" target="_blank">
+                Ruby on Rails API
+                <i class="fa fa-external-link"></i>
+              </a>
+            </li>
+            <li data-toggle="tooltip" data-placement="right" title="Ruby gems download ranking">
+              <a href="http://bestgems.org/" target="_blank" rel="nofollow">
+                Best Gems
+                <i class="fa fa-external-link"></i>
+              </a>
+            </li>
+            <li data-toggle="tooltip" data-placement="right" title="comprehensive catalog of Ruby and Rails plug-ins, gems, tools and resources">
+              <a href="https://www.ruby-toolbox.com/" target="_blank" rel="nofollow">
+                The Ruby Toolbox
+                <i class="fa fa-external-link"></i>
+              </a>
+            </li>
+          </ul>
+        </li>
+
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Electronics <span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li data-toggle="tooltip" data-placement="right" title="Calculate and simulate operating modes of the 555 (LM555, NE555) timer chip">
+              <a href="http://visual555.tardate.com" target="_blank">
+                Visual 555 Calculator
+                <i class="fa fa-external-link"></i>
+              </a>
+            </li>
+            <li class="divider"></li>
+            <li class="dropdown-header">Reference</li>
+            <li data-toggle="tooltip" data-placement="right" title="series of online textbooks covering electricity and electronics">
+              <a href="http://www.allaboutcircuits.com/" target="_blank" rel="nofollow">
+                AllAboutCircuits
+                <i class="fa fa-external-link"></i>
+              </a>
+            </li>
+            <li data-toggle="tooltip" data-placement="right" title="my first stop for datasheet searches">
+              <a href="http://www.futurlec.com/cgi-bin/search/search.cgi" target="_blank" rel="nofollow">
+                Datasheets @ Futurelec
+                <i class="fa fa-external-link"></i>
+              </a>
+            </li>
+            <li class="divider"></li>
+            <li class="dropdown-header">Suppliers</li>
+            <li data-toggle="tooltip" data-placement="right" title="my favourite place to shop for components">
+              <a href="http://www.aliexpress.com/" target="_blank" rel="nofollow">
+                AliExpress
+                <i class="fa fa-external-link"></i>
+              </a>
+            </li>
+            <li data-toggle="tooltip" data-placement="right" title="Cool Gadgets at the Right Price - DX Free Shipping Worldwide">
+              <a href="http://www.dx.com/" target="_blank" rel="nofollow">
+                dealExtreme
+                <i class="fa fa-external-link"></i>
+              </a>
+            </li>
+          </ul>
+        </li>
+
+      </ul>
     </div>
   </nav>
 
   <div class="container">
     <div class="row">
-      <div class="col-md-2">
-        <ul class="list-group">
-          <li class="list-group-item list-group-item-warning">Web Development</li>
-          <li class="list-group-item">
-            <a href="#">HTML/URL Encoder</a>
-          </li>
-          <li class="list-group-item" data-toggle="tooltip" data-placement="right" title="Adobe Kuler is now Adobe Color CC">
-            <a href="https://color.adobe.com" target="_blank">
-              kuler
-              <i class="fa fa-external-link"></i>
-            </a>
-          </li>
-          <li class="list-group-item" data-toggle="tooltip" data-placement="right" title="Collect, inspect and debug HTTP requests and webhooks">
-            <a href="http://requestb.in/" target="_blank">
-              RequestBin
-              <i class="fa fa-external-link"></i>
-            </a>
-          </li>
+      <div class="col-md-12">
 
-
-          <li class="list-group-item list-group-item-warning">Electronics</li>
-          <li class="list-group-item" data-toggle="tooltip" data-placement="right" title="Calculate and simulate operating modes of the 555 (LM555, NE555) timer chip">
-            <a href="http://visual555.tardate.com" target="_blank">
-              Visual 555
-              <i class="fa fa-external-link"></i>
-            </a>
-          </li>
-        </ul>
-
-      </div>
-      <div class="col-md-10">
-
-        <div class="panel panel-info">
+        <div id="workspace" class="panel panel-info">
           <div class="panel-heading">
-            <h3 class="panel-title">HTML and URI Encoding</h3>
+            <h3 id="workspace_title" class="panel-title">HTML and URI Encoding</h3>
           </div>
-          <div class="panel-body">
+          <div id="workspace_content" class="panel-body">
             <form id="webEncoder">
               <div class="form-group">
                 <label for="inText">source</label>
