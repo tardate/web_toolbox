@@ -46,6 +46,7 @@ class root.WorkspaceComponent
     $('#workspace_title',@container).text(@bodyTitle())
     $('#workspace_content',@container).html(@bodyTemplate())
     ref_ul = $('#workspace_references ul.reflist',@container)
+    ref_ul.html('')
     if references = @references()
       for reference in references
         a = $('<a></a>')
@@ -54,7 +55,6 @@ class root.WorkspaceComponent
         ref_ul.append($('<li></li>').append(a))
       $('#workspace_references',@container).show()
     else
-      ref_ul.html('')
       $('#workspace_references',@container).hide()
 
   # override in subclasses to implement workspace-specific recalc

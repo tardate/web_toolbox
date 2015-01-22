@@ -54,6 +54,7 @@
       $('#workspace_title', this.container).text(this.bodyTitle());
       $('#workspace_content', this.container).html(this.bodyTemplate());
       ref_ul = $('#workspace_references ul.reflist', this.container);
+      ref_ul.html('');
       if (references = this.references()) {
         for (_i = 0, _len = references.length; _i < _len; _i++) {
           reference = references[_i];
@@ -64,7 +65,6 @@
         }
         return $('#workspace_references', this.container).show();
       } else {
-        ref_ul.html('');
         return $('#workspace_references', this.container).hide();
       }
     };
