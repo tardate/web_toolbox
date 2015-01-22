@@ -7,12 +7,6 @@ class root.WebEncoderWorkspace extends root.WorkspaceComponent
     super
     @outElement = $('#outText',@container)
     @inElement = $('#inText',@container)
-    instance = @
-    $('[data-action]',@container).on('click', (e)->
-      e.preventDefault()
-      action = $(@).data('action')
-      instance[action]()
-    )
 
   bodyText: ->
     "HTML and URI Encoding"

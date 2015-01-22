@@ -26,6 +26,12 @@ class root.WorkspaceComponent
     $('#workspace_title',@container).text(@bodyText())
     $('#workspace_content',@container).html(@bodyTemplate())
     @updateReferences()
+    instance = @
+    $('[data-action]',@container).on('click', (e)->
+      e.preventDefault()
+      action = $(@).data('action')
+      instance[action]()
+    )
 
   updateReferences: ->
     ref_ul = $('#workspace_references ul.reflist',@container)

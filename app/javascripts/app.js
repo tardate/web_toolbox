@@ -23,10 +23,18 @@
     };
 
     function WorkspaceComponent() {
+      var instance;
       this.container = $('#workspace');
       $('#workspace_title', this.container).text(this.bodyText());
       $('#workspace_content', this.container).html(this.bodyTemplate());
       this.updateReferences();
+      instance = this;
+      $('[data-action]', this.container).on('click', function(e) {
+        var action;
+        e.preventDefault();
+        action = $(this).data('action');
+        return instance[action]();
+      });
     }
 
     WorkspaceComponent.prototype.updateReferences = function() {
@@ -102,21 +110,102 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
+  root.OhmsLawWorkspace = (function(_super) {
+    __extends(OhmsLawWorkspace, _super);
+
+    function OhmsLawWorkspace() {
+      OhmsLawWorkspace.__super__.constructor.apply(this, arguments);
+      this.init();
+    }
+
+    OhmsLawWorkspace.prototype.init = function() {
+      var instance;
+      instance = this;
+      return $('.recalc_trigger', this.container).on('change keyup', function() {
+        instance.recalc(this);
+        return true;
+      });
+    };
+
+    OhmsLawWorkspace.prototype.recalc = function(e) {
+      var changing, i, new_i, new_r, new_v, r, v;
+      changing = $(e).attr('id');
+      if (!changing) {
+        return;
+      }
+      v = parseFloat($('#voltage', this.container).val());
+      i = parseFloat($('#current', this.container).val());
+      r = parseFloat($('#resistance', this.container).val());
+      if (changing === 'voltage') {
+        new_v = v;
+        new_i = i || new_v / r;
+        new_r = new_v / new_i;
+      }
+      if (changing === 'current') {
+        new_i = i;
+        new_r = r || v / new_i;
+        new_v = new_i * new_r;
+      }
+      if (changing === 'resistance') {
+        new_r = r;
+        new_i = i || v / new_r;
+        new_v = new_i * new_r;
+      }
+      if (changing !== 'voltage') {
+        $('#voltage', this.container).val(new_v || '');
+      }
+      if (changing !== 'current') {
+        $('#current', this.container).val(new_i || '');
+      }
+      if (changing !== 'resistance') {
+        $('#resistance', this.container).val(new_r || '');
+      }
+      return true;
+    };
+
+    OhmsLawWorkspace.prototype.clear = function() {
+      $('#voltage', this.container).val('');
+      $('#current', this.container).val('');
+      return $('#resistance', this.container).val('');
+    };
+
+    OhmsLawWorkspace.prototype.bodyText = function() {
+      return "Ohm's Law Calculator";
+    };
+
+    OhmsLawWorkspace.prototype.bodyTemplate = function() {
+      return "<form class=\"form-inline\">\n  <div class=\"form-group\">\n    <label for=\"voltage\" class=\"control-label\">V</label>\n    <input type=\"input\" class=\"recalc_trigger form-control\" id=\"voltage\" placeholder=\"volts\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <label for=\"current\" class=\"control-label\">= i</label>\n    <input type=\"input\" class=\"recalc_trigger form-control\" id=\"current\" placeholder=\"amps\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <label for=\"resistance\" class=\"control-label\">x R</label>\n    <input type=\"input\" class=\"recalc_trigger form-control\" id=\"resistance\" placeholder=\"&Omega;\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <button class=\"btn btn-default\" data-action=\"clear\">Clear..</button>\n  </div>\n</form>";
+    };
+
+    OhmsLawWorkspace.prototype.references = function() {
+      return [
+        {
+          href: 'http://en.wikipedia.org/wiki/Ohm%27s_law',
+          name: "Ohm's law on Wikipedia"
+        }
+      ];
+    };
+
+    return OhmsLawWorkspace;
+
+  })(root.WorkspaceComponent);
+
+}).call(this);
+
+(function() {
+  var root,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
   root.WebEncoderWorkspace = (function(_super) {
     __extends(WebEncoderWorkspace, _super);
 
     function WebEncoderWorkspace() {
-      var instance;
       WebEncoderWorkspace.__super__.constructor.apply(this, arguments);
       this.outElement = $('#outText', this.container);
       this.inElement = $('#inText', this.container);
-      instance = this;
-      $('[data-action]', this.container).on('click', function(e) {
-        var action;
-        e.preventDefault();
-        action = $(this).data('action');
-        return instance[action]();
-      });
     }
 
     WebEncoderWorkspace.prototype.bodyText = function() {
