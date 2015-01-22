@@ -3,19 +3,8 @@ root = exports ? this
 # ohms law calculator
 class root.OhmsLawWorkspace extends root.WorkspaceComponent
 
-  constructor: ->
-    super
-    @init()
-
-  init: ->
-    instance = @
-    $('.recalc_trigger',@container).on('change keyup', ()->
-      instance.recalc(@)
-      true
-    )
-
-  recalc: (e)->
-    changing = $(e).attr('id')
+  recalc: (element)->
+    changing = $(element).attr('id')
     return unless changing
     v = parseFloat( $('#voltage',@container).val() )
     i = parseFloat( $('#current',@container).val() )
@@ -43,7 +32,7 @@ class root.OhmsLawWorkspace extends root.WorkspaceComponent
     $('#current',@container).val('')
     $('#resistance',@container).val('')
 
-  bodyText: ->
+  bodyTitle: ->
     "Ohm's Law Calculator"
 
   bodyTemplate: ->
@@ -51,15 +40,15 @@ class root.OhmsLawWorkspace extends root.WorkspaceComponent
 <form class="form-inline">
   <div class="form-group">
     <label for="voltage" class="control-label">V</label>
-    <input type="input" class="recalc_trigger form-control" id="voltage" placeholder="volts" autocomplete="off">
+    <input type="input" class="form-control" data-recalc="trigger" id="voltage" placeholder="volts" autocomplete="off">
   </div>
   <div class="form-group">
     <label for="current" class="control-label">= i</label>
-    <input type="input" class="recalc_trigger form-control" id="current" placeholder="amps" autocomplete="off">
+    <input type="input" class="form-control" data-recalc="trigger" id="current" placeholder="amps" autocomplete="off">
   </div>
   <div class="form-group">
     <label for="resistance" class="control-label">x R</label>
-    <input type="input" class="recalc_trigger form-control" id="resistance" placeholder="&Omega;" autocomplete="off">
+    <input type="input" class="form-control" data-recalc="trigger" id="resistance" placeholder="&Omega;" autocomplete="off">
   </div>
   <div class="form-group">
     <button class="btn btn-default" data-action="clear">Clear..</button>

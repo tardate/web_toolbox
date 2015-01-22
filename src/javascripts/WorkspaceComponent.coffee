@@ -23,9 +23,11 @@ class root.WorkspaceComponent
   # #workspace_content: element the component will render itself within
   constructor: ->
     @container = $('#workspace')
-    $('#workspace_title',@container).text(@bodyText())
-    $('#workspace_content',@container).html(@bodyTemplate())
-    @updateReferences()
+    @drawWorkspace()
+    @enableActions()
+    @enableRecalc()
+
+  enableActions: ->
     instance = @
     $('[data-action]',@container).on('click', (e)->
       e.preventDefault()
@@ -33,7 +35,16 @@ class root.WorkspaceComponent
       instance[action]()
     )
 
-  updateReferences: ->
+  enableRecalc: ->
+    instance = @
+    $('[data-recalc]',@container).on('change keyup', ()->
+      instance.recalc(@)
+      true
+    )
+
+  drawWorkspace: ->
+    $('#workspace_title',@container).text(@bodyTitle())
+    $('#workspace_content',@container).html(@bodyTemplate())
     ref_ul = $('#workspace_references ul.reflist',@container)
     if references = @references()
       for reference in references
@@ -46,7 +57,11 @@ class root.WorkspaceComponent
       ref_ul.html('')
       $('#workspace_references',@container).hide()
 
-  bodyText: ->
+  # override in subclasses to implement workspace-specific recalc
+  recalc: (element)->
+
+  # override in subclasses to define workspace-specific title
+  bodyTitle: ->
     "About The Toolbox"
 
   bodyTemplate: ->

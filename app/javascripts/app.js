@@ -23,22 +23,36 @@
     };
 
     function WorkspaceComponent() {
-      var instance;
       this.container = $('#workspace');
-      $('#workspace_title', this.container).text(this.bodyText());
-      $('#workspace_content', this.container).html(this.bodyTemplate());
-      this.updateReferences();
+      this.drawWorkspace();
+      this.enableActions();
+      this.enableRecalc();
+    }
+
+    WorkspaceComponent.prototype.enableActions = function() {
+      var instance;
       instance = this;
-      $('[data-action]', this.container).on('click', function(e) {
+      return $('[data-action]', this.container).on('click', function(e) {
         var action;
         e.preventDefault();
         action = $(this).data('action');
         return instance[action]();
       });
-    }
+    };
 
-    WorkspaceComponent.prototype.updateReferences = function() {
+    WorkspaceComponent.prototype.enableRecalc = function() {
+      var instance;
+      instance = this;
+      return $('[data-recalc]', this.container).on('change keyup', function() {
+        instance.recalc(this);
+        return true;
+      });
+    };
+
+    WorkspaceComponent.prototype.drawWorkspace = function() {
       var a, ref_ul, reference, references, _i, _len;
+      $('#workspace_title', this.container).text(this.bodyTitle());
+      $('#workspace_content', this.container).html(this.bodyTemplate());
       ref_ul = $('#workspace_references ul.reflist', this.container);
       if (references = this.references()) {
         for (_i = 0, _len = references.length; _i < _len; _i++) {
@@ -55,7 +69,9 @@
       }
     };
 
-    WorkspaceComponent.prototype.bodyText = function() {
+    WorkspaceComponent.prototype.recalc = function(element) {};
+
+    WorkspaceComponent.prototype.bodyTitle = function() {
       return "About The Toolbox";
     };
 
@@ -114,22 +130,12 @@
     __extends(OhmsLawWorkspace, _super);
 
     function OhmsLawWorkspace() {
-      OhmsLawWorkspace.__super__.constructor.apply(this, arguments);
-      this.init();
+      return OhmsLawWorkspace.__super__.constructor.apply(this, arguments);
     }
 
-    OhmsLawWorkspace.prototype.init = function() {
-      var instance;
-      instance = this;
-      return $('.recalc_trigger', this.container).on('change keyup', function() {
-        instance.recalc(this);
-        return true;
-      });
-    };
-
-    OhmsLawWorkspace.prototype.recalc = function(e) {
+    OhmsLawWorkspace.prototype.recalc = function(element) {
       var changing, i, new_i, new_r, new_v, r, v;
-      changing = $(e).attr('id');
+      changing = $(element).attr('id');
       if (!changing) {
         return;
       }
@@ -169,12 +175,12 @@
       return $('#resistance', this.container).val('');
     };
 
-    OhmsLawWorkspace.prototype.bodyText = function() {
+    OhmsLawWorkspace.prototype.bodyTitle = function() {
       return "Ohm's Law Calculator";
     };
 
     OhmsLawWorkspace.prototype.bodyTemplate = function() {
-      return "<form class=\"form-inline\">\n  <div class=\"form-group\">\n    <label for=\"voltage\" class=\"control-label\">V</label>\n    <input type=\"input\" class=\"recalc_trigger form-control\" id=\"voltage\" placeholder=\"volts\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <label for=\"current\" class=\"control-label\">= i</label>\n    <input type=\"input\" class=\"recalc_trigger form-control\" id=\"current\" placeholder=\"amps\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <label for=\"resistance\" class=\"control-label\">x R</label>\n    <input type=\"input\" class=\"recalc_trigger form-control\" id=\"resistance\" placeholder=\"&Omega;\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <button class=\"btn btn-default\" data-action=\"clear\">Clear..</button>\n  </div>\n</form>";
+      return "<form class=\"form-inline\">\n  <div class=\"form-group\">\n    <label for=\"voltage\" class=\"control-label\">V</label>\n    <input type=\"input\" class=\"form-control\" data-recalc=\"trigger\" id=\"voltage\" placeholder=\"volts\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <label for=\"current\" class=\"control-label\">= i</label>\n    <input type=\"input\" class=\"form-control\" data-recalc=\"trigger\" id=\"current\" placeholder=\"amps\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <label for=\"resistance\" class=\"control-label\">x R</label>\n    <input type=\"input\" class=\"form-control\" data-recalc=\"trigger\" id=\"resistance\" placeholder=\"&Omega;\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <button class=\"btn btn-default\" data-action=\"clear\">Clear..</button>\n  </div>\n</form>";
     };
 
     OhmsLawWorkspace.prototype.references = function() {
@@ -208,7 +214,7 @@
       this.inElement = $('#inText', this.container);
     }
 
-    WebEncoderWorkspace.prototype.bodyText = function() {
+    WebEncoderWorkspace.prototype.bodyTitle = function() {
       return "HTML and URI Encoding";
     };
 
