@@ -6,6 +6,10 @@ module.exports = (grunt)->
       coffee: {
         files: ['src/javascripts/**/*.coffee'],
         tasks: ['coffee']
+      },
+      javascript: {
+        files: ["app/javascripts/*.js", "specs/*_spec.js"],
+        tasks: ['test']
       }
     },
     coffee: {

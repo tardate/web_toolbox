@@ -43,7 +43,7 @@
     WorkspaceComponent.prototype.enableRecalc = function() {
       var instance;
       instance = this;
-      return $('[data-recalc]', this.container).on('change keyup', function() {
+      return $('[data-trigger=recalc]', this.container).on('change keyup', function() {
         instance.recalc(this);
         return true;
       });
@@ -98,9 +98,11 @@
     function AppController() {}
 
     AppController.activate = function() {
-      $('[data-toggle="tooltip"]').tooltip({
-        container: 'body'
-      });
+      try {
+        $('[data-toggle="tooltip"]').tooltip({
+          container: 'body'
+        });
+      } catch (_error) {}
       return root.WorkspaceComponent.activate();
     };
 
@@ -128,61 +130,72 @@
       return LM317VoltageWorkspace.__super__.constructor.apply(this, arguments);
     }
 
+    LM317VoltageWorkspace.modified = null;
+
     LM317VoltageWorkspace.prototype.recalc = function(element) {
-      var changing, new_r1, new_r2, new_vout, r1, r2, vout;
-      changing = $(element).attr('id');
-      if (!changing) {
-        return;
-      }
+      var r1, r2, result, vout;
       vout = parseFloat($('#vout', this.container).val());
       r1 = parseFloat($('#r1', this.container).val());
       r2 = parseFloat($('#r2', this.container).val());
-      if (changing === 'vout') {
-        new_vout = vout;
-        if (r1) {
-          new_r1 = r1;
-          new_r2 = new_r1 * (new_vout / 1.25 - 1);
-        } else {
-          new_r2 = r2;
-          new_r1 = new_r2 / (new_vout / 1.25 - 1);
-        }
+      result = this.calculateNewValues(vout, r1, r2);
+      $('#vout', this.container).val(result.vout || '');
+      $('#r1', this.container).val(result.r1 || '');
+      $('#r2', this.container).val(result.r2 || '');
+      if (!result.vout && !result.r1 && !result.r2) {
+        this.clearModified();
       }
-      if (changing === 'r1') {
-        new_r1 = r1;
-        if (r2) {
-          new_r2 = r2;
-          new_vout = 1.25 * (1 + new_r2 / new_r1);
-        } else {
-          new_vout = vout;
-          new_r2 = new_r1 * (new_vout / 1.25 - 1);
-        }
-      }
-      if (changing === 'r2') {
-        new_r2 = r2;
-        if (r1) {
-          new_r1 = r1;
-          new_vout = 1.25 * (1 + new_r2 / new_r1);
-        } else {
-          new_vout = vout;
-          new_r1 = new_r2 / (new_vout / 1.25 - 1);
-        }
-      }
-      if (new_vout !== vout) {
-        $('#vout', this.container).val(new_vout || '');
-      }
-      if (new_r1 !== r1) {
-        $('#r1', this.container).val(new_r1 || '');
-      }
-      if (new_r2 !== r2) {
-        $('#r2', this.container).val(new_r2 || '');
+      if (this.modified) {
+        $('#' + this.modified, this.container).attr('disabled', true);
       }
       return true;
+    };
+
+    LM317VoltageWorkspace.prototype.determineResultElement = function(vout, r1, r2) {
+      var result;
+      if (vout && r1 && !r2) {
+        result = 'r2';
+      }
+      if (vout && !r1 && r2) {
+        result || (result = 'r1');
+      }
+      if (!vout && r1 && r2) {
+        result || (result = 'vout');
+      }
+      return result;
+    };
+
+    LM317VoltageWorkspace.prototype.calculateNewValues = function(vout, r1, r2) {
+      var new_r1, new_r2, new_vout;
+      this.modified || (this.modified = this.determineResultElement(vout, r1, r2));
+      new_vout = vout;
+      new_r1 = r1;
+      new_r2 = r2;
+      if (this.modified === 'r1') {
+        new_r1 = new_r2 / (new_vout / 1.25 - 1);
+      }
+      if (this.modified === 'r2') {
+        new_r2 = new_r1 * (new_vout / 1.25 - 1);
+      }
+      if (this.modified === 'vout') {
+        new_vout = 1.25 * (1 + new_r2 / new_r1);
+      }
+      return {
+        vout: new_vout,
+        r1: new_r1,
+        r2: new_r2
+      };
     };
 
     LM317VoltageWorkspace.prototype.clear = function() {
       $('#vout', this.container).val('');
       $('#r1', this.container).val('');
-      return $('#r2', this.container).val('');
+      $('#r2', this.container).val('');
+      return this.clearModified();
+    };
+
+    LM317VoltageWorkspace.prototype.clearModified = function() {
+      this.modified = null;
+      return $('[data-trigger=recalc]', this.container).attr('disabled', false);
     };
 
     LM317VoltageWorkspace.prototype.bodyTitle = function() {
@@ -190,7 +203,7 @@
     };
 
     LM317VoltageWorkspace.prototype.bodyTemplate = function() {
-      return "<p>\n  Enter any two values to calculate the other...\n</p>\n<form class=\"form-inline\">\n  <div class=\"form-group\">\n    <label for=\"voltage\" class=\"control-label\">Vout</label>\n    <input type=\"input\" class=\"form-control\" data-recalc=\"trigger\" id=\"vout\" placeholder=\"volts\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <label for=\"current\" class=\"control-label\">= 1.25 * ( R2</label>\n    <input type=\"input\" class=\"form-control\" data-recalc=\"trigger\" id=\"r2\" placeholder=\"&Omega;\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <label for=\"resistance\" class=\"control-label\">/R1 )</label>\n    <input type=\"input\" class=\"form-control\" data-recalc=\"trigger\" id=\"r1\" placeholder=\"&Omega;\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <button class=\"btn btn-default\" data-action=\"clear\">Clear..</button>\n  </div>\n</form>";
+      return "<p>\n  Enter any two values to calculate the other...\n</p>\n<form class=\"form-inline\">\n  <div class=\"form-group\">\n    <label for=\"voltage\" class=\"control-label\">Vout</label>\n    <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"vout\" placeholder=\"volts\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <label for=\"current\" class=\"control-label\">= 1.25 * ( R2</label>\n    <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"r2\" placeholder=\"&Omega;\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <label for=\"resistance\" class=\"control-label\">/R1 )</label>\n    <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"r1\" placeholder=\"&Omega;\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <button class=\"btn btn-default\" data-action=\"clear\">Clear..</button>\n  </div>\n</form>";
     };
 
     LM317VoltageWorkspace.prototype.references = function() {
@@ -277,7 +290,7 @@
     };
 
     OhmsLawWorkspace.prototype.bodyTemplate = function() {
-      return "<p>\n  Enter any two values to calculate the other...\n</p>\n<form class=\"form-inline\">\n  <div class=\"form-group\">\n    <label for=\"voltage\" class=\"control-label\">V</label>\n    <input type=\"input\" class=\"form-control\" data-recalc=\"trigger\" id=\"voltage\" placeholder=\"volts\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <label for=\"current\" class=\"control-label\">= i</label>\n    <input type=\"input\" class=\"form-control\" data-recalc=\"trigger\" id=\"current\" placeholder=\"amps\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <label for=\"resistance\" class=\"control-label\">x R</label>\n    <input type=\"input\" class=\"form-control\" data-recalc=\"trigger\" id=\"resistance\" placeholder=\"&Omega;\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <button class=\"btn btn-default\" data-action=\"clear\">Clear..</button>\n  </div>\n</form>";
+      return "<p>\n  Enter any two values to calculate the other...\n</p>\n<form class=\"form-inline\">\n  <div class=\"form-group\">\n    <label for=\"voltage\" class=\"control-label\">V</label>\n    <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"voltage\" placeholder=\"volts\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <label for=\"current\" class=\"control-label\">= i</label>\n    <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"current\" placeholder=\"amps\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <label for=\"resistance\" class=\"control-label\">x R</label>\n    <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"resistance\" placeholder=\"&Omega;\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <button class=\"btn btn-default\" data-action=\"clear\">Clear..</button>\n  </div>\n</form>";
     };
 
     OhmsLawWorkspace.prototype.references = function() {

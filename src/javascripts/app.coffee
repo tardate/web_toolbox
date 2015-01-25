@@ -4,7 +4,8 @@ root = exports ? this
 class root.AppController
 
   @activate: ->
-    $('[data-toggle="tooltip"]').tooltip(container: 'body')
+    try
+      $('[data-toggle="tooltip"]').tooltip(container: 'body')
     root.WorkspaceComponent.activate()
 
 jQuery ->

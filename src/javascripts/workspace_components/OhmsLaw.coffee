@@ -37,18 +37,21 @@ class root.OhmsLawWorkspace extends root.WorkspaceComponent
 
   bodyTemplate: ->
     """
+<p>
+  Enter any two values to calculate the other...
+</p>
 <form class="form-inline">
   <div class="form-group">
     <label for="voltage" class="control-label">V</label>
-    <input type="input" class="form-control" data-recalc="trigger" id="voltage" placeholder="volts" autocomplete="off">
+    <input type="input" class="form-control" data-trigger="recalc" id="voltage" placeholder="volts" autocomplete="off">
   </div>
   <div class="form-group">
     <label for="current" class="control-label">= i</label>
-    <input type="input" class="form-control" data-recalc="trigger" id="current" placeholder="amps" autocomplete="off">
+    <input type="input" class="form-control" data-trigger="recalc" id="current" placeholder="amps" autocomplete="off">
   </div>
   <div class="form-group">
     <label for="resistance" class="control-label">x R</label>
-    <input type="input" class="form-control" data-recalc="trigger" id="resistance" placeholder="&Omega;" autocomplete="off">
+    <input type="input" class="form-control" data-trigger="recalc" id="resistance" placeholder="&Omega;" autocomplete="off">
   </div>
   <div class="form-group">
     <button class="btn btn-default" data-action="clear">Clear..</button>

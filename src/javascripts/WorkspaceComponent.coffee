@@ -37,7 +37,7 @@ class root.WorkspaceComponent
 
   enableRecalc: ->
     instance = @
-    $('[data-recalc]',@container).on('change keyup', ()->
+    $('[data-trigger=recalc]',@container).on('change keyup', ()->
       instance.recalc(@)
       true
     )
