@@ -243,46 +243,68 @@
       return OhmsLawWorkspace.__super__.constructor.apply(this, arguments);
     }
 
+    OhmsLawWorkspace.calculated = null;
+
     OhmsLawWorkspace.prototype.recalc = function(element) {
-      var changing, i, new_i, new_r, new_v, r, v;
-      changing = $(element).attr('id');
-      if (!changing) {
-        return;
+      var current, resistance, result, voltage;
+      voltage = parseFloat($('#voltage', this.container).val());
+      current = parseFloat($('#current', this.container).val());
+      resistance = parseFloat($('#resistance', this.container).val());
+      result = this.calculateNewValues(voltage, current, resistance);
+      $('#voltage', this.container).val(result.voltage || '');
+      $('#current', this.container).val(result.current || '');
+      $('#resistance', this.container).val(result.resistance || '');
+      if (!result.voltage && !result.current && !result.resistance) {
+        this.clearCalculated();
       }
-      v = parseFloat($('#voltage', this.container).val());
-      i = parseFloat($('#current', this.container).val());
-      r = parseFloat($('#resistance', this.container).val());
-      if (changing === 'voltage') {
-        new_v = v;
-        new_i = i || new_v / r;
-        new_r = new_v / new_i;
-      }
-      if (changing === 'current') {
-        new_i = i;
-        new_r = r || v / new_i;
-        new_v = new_i * new_r;
-      }
-      if (changing === 'resistance') {
-        new_r = r;
-        new_i = i || v / new_r;
-        new_v = new_i * new_r;
-      }
-      if (changing !== 'voltage') {
-        $('#voltage', this.container).val(new_v || '');
-      }
-      if (changing !== 'current') {
-        $('#current', this.container).val(new_i || '');
-      }
-      if (changing !== 'resistance') {
-        $('#resistance', this.container).val(new_r || '');
+      if (this.calculated) {
+        $('#' + this.calculated, this.container).attr('disabled', true);
       }
       return true;
+    };
+
+    OhmsLawWorkspace.prototype.determineResultElement = function(voltage, current, resistance) {
+      var result;
+      if (voltage && current && !resistance) {
+        result = 'resistance';
+      }
+      if (voltage && !current && resistance) {
+        result || (result = 'current');
+      }
+      if (!voltage && current && resistance) {
+        result || (result = 'voltage');
+      }
+      return result;
+    };
+
+    OhmsLawWorkspace.prototype.calculateNewValues = function(voltage, current, resistance) {
+      this.calculated || (this.calculated = this.determineResultElement(voltage, current, resistance));
+      if (this.calculated === 'voltage') {
+        voltage = current * resistance;
+      }
+      if (this.calculated === 'current') {
+        current = voltage / resistance;
+      }
+      if (this.calculated === 'resistance') {
+        resistance = voltage / current;
+      }
+      return {
+        voltage: voltage,
+        current: current,
+        resistance: resistance
+      };
     };
 
     OhmsLawWorkspace.prototype.clear = function() {
       $('#voltage', this.container).val('');
       $('#current', this.container).val('');
-      return $('#resistance', this.container).val('');
+      $('#resistance', this.container).val('');
+      return this.clearCalculated();
+    };
+
+    OhmsLawWorkspace.prototype.clearCalculated = function() {
+      this.calculated = null;
+      return $('[data-trigger=recalc]', this.container).attr('disabled', false);
     };
 
     OhmsLawWorkspace.prototype.bodyTitle = function() {

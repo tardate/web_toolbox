@@ -3,34 +3,50 @@ root = exports ? this
 # ohms law calculator
 class root.OhmsLawWorkspace extends root.WorkspaceComponent
 
-  recalc: (element)->
-    changing = $(element).attr('id')
-    return unless changing
-    v = parseFloat( $('#voltage',@container).val() )
-    i = parseFloat( $('#current',@container).val() )
-    r = parseFloat( $('#resistance',@container).val() )
+  @calculated: null
 
-    if changing == 'voltage'
-      new_v = v
-      new_i = i || new_v / r
-      new_r = new_v / new_i
-    if changing == 'current'
-      new_i = i
-      new_r = r || v / new_i
-      new_v = new_i * new_r
-    if changing == 'resistance'
-      new_r = r
-      new_i = i || v / new_r
-      new_v = new_i * new_r
-    $('#voltage',@container).val(new_v || '') unless changing == 'voltage'
-    $('#current',@container).val(new_i || '') unless changing == 'current'
-    $('#resistance',@container).val(new_r || '') unless changing == 'resistance'
+  recalc: (element)->
+    voltage = parseFloat( $('#voltage',@container).val() )
+    current = parseFloat( $('#current',@container).val() )
+    resistance = parseFloat( $('#resistance',@container).val() )
+
+    result = @calculateNewValues(voltage,current,resistance)
+    $('#voltage',@container).val(result.voltage || '')
+    $('#current',@container).val(result.current || '')
+    $('#resistance',@container).val(result.resistance || '')
+    @clearCalculated() if !result.voltage && !result.current && !result.resistance
+    $('#' + @calculated,@container).attr('disabled',true) if @calculated
+
     true
+
+  determineResultElement: (voltage,current,resistance)->
+    result = 'resistance' if voltage && current && !resistance
+    result ||= 'current' if voltage && !current && resistance
+    result ||= 'voltage' if !voltage && current && resistance
+    result
+
+  calculateNewValues: (voltage,current,resistance)->
+    @calculated ||= @determineResultElement(voltage,current,resistance)
+    # v = ir
+    voltage = current * resistance if @calculated == 'voltage'
+    current = voltage / resistance if @calculated == 'current'
+    resistance = voltage / current if @calculated == 'resistance'
+
+    {
+      voltage: voltage,
+      current: current,
+      resistance: resistance
+    }
 
   clear: ->
     $('#voltage',@container).val('')
     $('#current',@container).val('')
     $('#resistance',@container).val('')
+    @clearCalculated()
+
+  clearCalculated: ->
+    @calculated = null
+    $('[data-trigger=recalc]',@container).attr('disabled',false)
 
   bodyTitle: ->
     "Ohm's Law Calculator"
