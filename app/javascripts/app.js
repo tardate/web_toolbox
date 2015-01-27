@@ -130,7 +130,7 @@
       return LM317VoltageWorkspace.__super__.constructor.apply(this, arguments);
     }
 
-    LM317VoltageWorkspace.modified = null;
+    LM317VoltageWorkspace.calculated = null;
 
     LM317VoltageWorkspace.prototype.recalc = function(element) {
       var r1, r2, result, vout;
@@ -142,10 +142,10 @@
       $('#r1', this.container).val(result.r1 || '');
       $('#r2', this.container).val(result.r2 || '');
       if (!result.vout && !result.r1 && !result.r2) {
-        this.clearModified();
+        this.clearCalculated();
       }
-      if (this.modified) {
-        $('#' + this.modified, this.container).attr('disabled', true);
+      if (this.calculated) {
+        $('#' + this.calculated, this.container).attr('disabled', true);
       }
       return true;
     };
@@ -166,17 +166,17 @@
 
     LM317VoltageWorkspace.prototype.calculateNewValues = function(vout, r1, r2) {
       var new_r1, new_r2, new_vout;
-      this.modified || (this.modified = this.determineResultElement(vout, r1, r2));
+      this.calculated || (this.calculated = this.determineResultElement(vout, r1, r2));
       new_vout = vout;
       new_r1 = r1;
       new_r2 = r2;
-      if (this.modified === 'r1') {
+      if (this.calculated === 'r1') {
         new_r1 = new_r2 / (new_vout / 1.25 - 1);
       }
-      if (this.modified === 'r2') {
+      if (this.calculated === 'r2') {
         new_r2 = new_r1 * (new_vout / 1.25 - 1);
       }
-      if (this.modified === 'vout') {
+      if (this.calculated === 'vout') {
         new_vout = 1.25 * (1 + new_r2 / new_r1);
       }
       return {
@@ -190,11 +190,11 @@
       $('#vout', this.container).val('');
       $('#r1', this.container).val('');
       $('#r2', this.container).val('');
-      return this.clearModified();
+      return this.clearCalculated();
     };
 
-    LM317VoltageWorkspace.prototype.clearModified = function() {
-      this.modified = null;
+    LM317VoltageWorkspace.prototype.clearCalculated = function() {
+      this.calculated = null;
       return $('[data-trigger=recalc]', this.container).attr('disabled', false);
     };
 

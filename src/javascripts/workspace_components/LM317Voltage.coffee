@@ -1,9 +1,9 @@
 root = exports ? this
 
-# ohms law calculator
+# LM317 adjustable regulator calculator
 class root.LM317VoltageWorkspace extends root.WorkspaceComponent
 
-  @modified: null
+  @calculated: null
 
   recalc: (element)->
     vout = parseFloat( $('#vout',@container).val() )
@@ -14,8 +14,8 @@ class root.LM317VoltageWorkspace extends root.WorkspaceComponent
     $('#vout',@container).val(result.vout || '')
     $('#r1',@container).val(result.r1 || '')
     $('#r2',@container).val(result.r2 || '')
-    @clearModified() if !result.vout && !result.r1 && !result.r2
-    $('#' + @modified,@container).attr('disabled',true) if @modified
+    @clearCalculated() if !result.vout && !result.r1 && !result.r2
+    $('#' + @calculated,@container).attr('disabled',true) if @calculated
 
     true
 
@@ -26,7 +26,7 @@ class root.LM317VoltageWorkspace extends root.WorkspaceComponent
     result
 
   calculateNewValues: (vout,r1,r2)->
-    @modified ||= @determineResultElement(vout,r1,r2)
+    @calculated ||= @determineResultElement(vout,r1,r2)
     new_vout = vout
     new_r1 = r1
     new_r2 = r2
@@ -34,9 +34,9 @@ class root.LM317VoltageWorkspace extends root.WorkspaceComponent
     # VOUT = 1.25 * ( 1 + R2/R1 )
     # R2 = R1 ( VOUT / 1.25 - 1 )
     # R1 = R2 / ( VOUT / 1.25 - 1 )
-    new_r1 = new_r2 / ( new_vout / 1.25 - 1 ) if @modified == 'r1'
-    new_r2 = new_r1 * ( new_vout / 1.25 - 1 ) if @modified == 'r2'
-    new_vout = 1.25 * ( 1 + new_r2 / new_r1 ) if @modified == 'vout'
+    new_r1 = new_r2 / ( new_vout / 1.25 - 1 ) if @calculated == 'r1'
+    new_r2 = new_r1 * ( new_vout / 1.25 - 1 ) if @calculated == 'r2'
+    new_vout = 1.25 * ( 1 + new_r2 / new_r1 ) if @calculated == 'vout'
 
     {
       vout: new_vout,
@@ -48,10 +48,10 @@ class root.LM317VoltageWorkspace extends root.WorkspaceComponent
     $('#vout',@container).val('')
     $('#r1',@container).val('')
     $('#r2',@container).val('')
-    @clearModified()
+    @clearCalculated()
 
-  clearModified: ->
-    @modified = null
+  clearCalculated: ->
+    @calculated = null
     $('[data-trigger=recalc]',@container).attr('disabled',false)
 
 

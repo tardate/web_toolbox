@@ -30,7 +30,7 @@ describe("LM317VoltageWorkspace.calculateNewValues()", function() {
     expect(result.vout.toFixed(2)).toEqual('6.93');
     expect(result.r1).toEqual(220.0);
     expect(result.r2).toEqual(1000.0);
-    expect(subject.modified).toEqual('vout');
+    expect(subject.calculated).toEqual('vout');
   });
 
   it("can calculate given vout,r1", function() {
@@ -38,7 +38,7 @@ describe("LM317VoltageWorkspace.calculateNewValues()", function() {
     expect(result.vout).toEqual(7.0);
     expect(result.r1).toEqual(220.0);
     expect(result.r2.toFixed(2)).toEqual('1012.00');
-    expect(subject.modified).toEqual('r2');
+    expect(subject.calculated).toEqual('r2');
   });
 
   it("can calculate given vout,r2", function() {
@@ -46,7 +46,7 @@ describe("LM317VoltageWorkspace.calculateNewValues()", function() {
     expect(result.vout).toEqual(7.0);
     expect(result.r1.toFixed(2)).toEqual('217.39');
     expect(result.r2).toEqual(1000.0);
-    expect(subject.modified).toEqual('r1');
+    expect(subject.calculated).toEqual('r1');
   });
 
 });
