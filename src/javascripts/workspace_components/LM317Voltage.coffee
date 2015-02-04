@@ -60,26 +60,37 @@ class root.LM317VoltageWorkspace extends root.WorkspaceComponent
 
   bodyTemplate: ->
     """
-<p>
-  Enter any two values to calculate the other...
-</p>
-<form class="form-inline">
-  <div class="form-group">
-    <label for="voltage" class="control-label">Vout</label>
-    <input type="input" class="form-control" data-trigger="recalc" id="vout" placeholder="volts" autocomplete="off">
+<row>
+  <div class="col-md-6">
+    <p>
+      Given
+      <strong>Vout = 1.25 * ( R2/R1 )</strong> , enter any two values to calculate the other...
+    </p>
+    <form class="form-horizontal">
+      <div class="form-group">
+        <label for="voltage" class="control-label">Vout</label>
+        <input type="input" class="form-control" data-trigger="recalc" id="vout" placeholder="1.2 to 37 volts" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="resistance" class="control-label">R1</label>
+        <input type="input" class="form-control" data-trigger="recalc" id="r1" placeholder="100&Omega; to 1k&Omega;" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="current" class="control-label">R2</label>
+        <input type="input" class="form-control" data-trigger="recalc" id="r2" placeholder="&Omega;" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <button class="btn btn-default" data-action="clear">Clear..</button>
+      </div>
+    </form>
   </div>
-  <div class="form-group">
-    <label for="current" class="control-label">= 1.25 * ( R2</label>
-    <input type="input" class="form-control" data-trigger="recalc" id="r2" placeholder="&Omega;" autocomplete="off">
+  <div class="col-md-6">
+    <h4>Typcial Application</h4>
+    <p class="text-center">
+      <img src="app/images/lm317_overview.png" width="400">
+    </p>
   </div>
-  <div class="form-group">
-    <label for="resistance" class="control-label">/R1 )</label>
-    <input type="input" class="form-control" data-trigger="recalc" id="r1" placeholder="&Omega;" autocomplete="off">
-  </div>
-  <div class="form-group">
-    <button class="btn btn-default" data-action="clear">Clear..</button>
-  </div>
-</form>
+</row>
     """
 
   references: ->
