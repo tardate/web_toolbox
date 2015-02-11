@@ -5,6 +5,9 @@ class root.OhmsLawWorkspace extends root.WorkspaceComponent
 
   @calculated: null
 
+  contextName: ->
+    'OhmsLaw'
+
   recalc: (element)->
     voltage = parseFloat( $('#voltage',@container).val() )
     current = parseFloat( $('#current',@container).val() )

@@ -15,7 +15,10 @@ class root.WorkspaceComponent
         $('body').trigger('workspace.activate', { name: workspace_name })
         true
     )
-    new root.WorkspaceComponent()
+    if hash = window.location.hash
+      eval('new ' + hash.replace('#','') + 'Workspace()')
+    else
+      new root.WorkspaceComponent()
 
   # Default constructor initialises the component attached to a common #workspace element
   # It expects two elements under #workspace:
@@ -24,8 +27,16 @@ class root.WorkspaceComponent
   constructor: ->
     @container = $('#workspace')
     @drawWorkspace()
+    @initialiseContext()
     @enableActions()
     @enableRecalc()
+
+  initialiseContext: ->
+    window.location.hash = @contextName()
+
+  # override in subclasses
+  contextName: ->
+    ''
 
   enableActions: ->
     instance = @
@@ -56,6 +67,7 @@ class root.WorkspaceComponent
       $('#workspace_references',@container).show()
     else
       $('#workspace_references',@container).hide()
+
 
   # override in subclasses to implement workspace-specific recalc
   recalc: (element)->

@@ -8,6 +8,9 @@ class root.WebEncoderWorkspace extends root.WorkspaceComponent
     @outElement = $('#outText',@container)
     @inElement = $('#inText',@container)
 
+  contextName: ->
+    'WebEncoder'
+
   bodyTitle: ->
     "HTML and URI Encoding"
 

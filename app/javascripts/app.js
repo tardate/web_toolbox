@@ -5,6 +5,7 @@
 
   root.WorkspaceComponent = (function() {
     WorkspaceComponent.activate = function() {
+      var hash;
       $('body').bind('workspace.activate', function(e, workspaceData) {
         return eval('new ' + workspaceData.name + '()');
       });
@@ -19,15 +20,28 @@
           return true;
         }
       });
-      return new root.WorkspaceComponent();
+      if (hash = window.location.hash) {
+        return eval('new ' + hash.replace('#', '') + 'Workspace()');
+      } else {
+        return new root.WorkspaceComponent();
+      }
     };
 
     function WorkspaceComponent() {
       this.container = $('#workspace');
       this.drawWorkspace();
+      this.initialiseContext();
       this.enableActions();
       this.enableRecalc();
     }
+
+    WorkspaceComponent.prototype.initialiseContext = function() {
+      return window.location.hash = this.contextName();
+    };
+
+    WorkspaceComponent.prototype.contextName = function() {
+      return '';
+    };
 
     WorkspaceComponent.prototype.enableActions = function() {
       var instance;
@@ -131,6 +145,10 @@
     }
 
     LM317VoltageWorkspace.calculated = null;
+
+    LM317VoltageWorkspace.prototype.contextName = function() {
+      return 'LM317Voltage';
+    };
 
     LM317VoltageWorkspace.prototype.recalc = function(element) {
       var r1, r2, result, vout;
@@ -245,6 +263,10 @@
 
     OhmsLawWorkspace.calculated = null;
 
+    OhmsLawWorkspace.prototype.contextName = function() {
+      return 'OhmsLaw';
+    };
+
     OhmsLawWorkspace.prototype.recalc = function(element) {
       var current, resistance, result, voltage;
       voltage = parseFloat($('#voltage', this.container).val());
@@ -345,6 +367,10 @@
       this.outElement = $('#outText', this.container);
       this.inElement = $('#inText', this.container);
     }
+
+    WebEncoderWorkspace.prototype.contextName = function() {
+      return 'WebEncoder';
+    };
 
     WebEncoderWorkspace.prototype.bodyTitle = function() {
       return "HTML and URI Encoding";

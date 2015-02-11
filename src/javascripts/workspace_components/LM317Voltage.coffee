@@ -5,6 +5,9 @@ class root.LM317VoltageWorkspace extends root.WorkspaceComponent
 
   @calculated: null
 
+  contextName: ->
+    'LM317Voltage'
+
   recalc: (element)->
     vout = parseFloat( $('#vout',@container).val() )
     r1 = parseFloat( $('#r1',@container).val() )
