@@ -67,7 +67,7 @@ class root.LM317VoltageWorkspace extends root.WorkspaceComponent
   <div class="col-md-6">
     <p>
       Given
-      <strong>Vout = 1.25 * ( R2/R1 )</strong> , enter any two values to calculate the other...
+      <strong>Vout = 1.25 * ( 1 + R2/R1 )</strong>, enter any two values to calculate the other...
     </p>
     <form class="form-horizontal">
       <div class="form-group">
