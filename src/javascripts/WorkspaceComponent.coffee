@@ -31,28 +31,6 @@ class root.WorkspaceComponent
     @enableActions()
     @enableRecalc()
 
-  initialiseContext: ->
-    window.location.hash = @contextName()
-
-  # override in subclasses
-  contextName: ->
-    ''
-
-  enableActions: ->
-    instance = @
-    $('[data-action]',@container).on('click', (e)->
-      e.preventDefault()
-      action = $(@).data('action')
-      instance[action]()
-    )
-
-  enableRecalc: ->
-    instance = @
-    $('[data-trigger=recalc]',@container).on('change keyup', ()->
-      instance.recalc(@)
-      true
-    )
-
   drawWorkspace: ->
     $('#workspace_title',@container).text(@bodyTitle())
     $('#workspace_content',@container).html(@bodyTemplate())
@@ -68,14 +46,63 @@ class root.WorkspaceComponent
     else
       $('#workspace_references',@container).hide()
 
+  initialiseContext: ->
+    window.location.hash = @contextName()
+    @applyParams()
+
+  applyParams: ->
+    for encoded_param in window.location.search.replace('?','').split('&')
+      parts = encoded_param.split('=')
+      if parts.length == 2
+        name = decodeURIComponent(parts[0])
+        value = decodeURIComponent(parts[1])
+        $('[data-trigger=recalc]#' + name,@container).val(value)
+    true
+
+  enableActions: ->
+    instance = @
+    $('[data-action]',@container).on('click', (e)->
+      e.preventDefault()
+      action = $(@).data('action')
+      instance[action]()
+    )
+
+  enableRecalc: ->
+    instance = @
+    $('[data-trigger=recalc]',@container).on('change keyup', ()->
+      instance.recalc(@)
+      true
+    )
+    instance.recalc()
+
+  updatePermalink: ->
+    permalink = []
+    for item in $('[data-trigger=recalc]',@container)
+      item = $(item)
+      value = item.val()
+      if value && !item.attr('disabled')
+        permalink.push( item.attr('id') + '=' + encodeURIComponent(value))
+    if permalink.length > 0
+      search = '?' + permalink.join('&')
+      $('#workspace_permalink').attr('href', search + '#' + @contextName() ).show()
+    else
+      search = ''
+      $('#workspace_permalink').hide()
+    true
 
   # override in subclasses to implement workspace-specific recalc
   recalc: (element)->
+    @updatePermalink()
+
+  # override in subclasses
+  contextName: ->
+    ''
 
   # override in subclasses to define workspace-specific title
   bodyTitle: ->
     "About The Toolbox"
 
+  # override in subclasses to define workspace-specific body
   bodyTemplate: ->
     # TODO: maybe switch to handlebars?
     """
@@ -88,5 +115,6 @@ for me to practice my minimalist javascripty/webby fu. So be forewarned! And hav
 </p>
     """
 
+  # override in subclasses to define workspace-specific reference list
   references: ->
     null

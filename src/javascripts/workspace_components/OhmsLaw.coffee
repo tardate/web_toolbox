@@ -19,7 +19,7 @@ class root.OhmsLawWorkspace extends root.WorkspaceComponent
     $('#resistance',@container).val(result.resistance || '')
     @clearCalculated() if !result.voltage && !result.current && !result.resistance
     $('#' + @calculated,@container).attr('disabled',true) if @calculated
-
+    @updatePermalink()
     true
 
   determineResultElement: (voltage,current,resistance)->

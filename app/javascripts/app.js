@@ -35,34 +35,6 @@
       this.enableRecalc();
     }
 
-    WorkspaceComponent.prototype.initialiseContext = function() {
-      return window.location.hash = this.contextName();
-    };
-
-    WorkspaceComponent.prototype.contextName = function() {
-      return '';
-    };
-
-    WorkspaceComponent.prototype.enableActions = function() {
-      var instance;
-      instance = this;
-      return $('[data-action]', this.container).on('click', function(e) {
-        var action;
-        e.preventDefault();
-        action = $(this).data('action');
-        return instance[action]();
-      });
-    };
-
-    WorkspaceComponent.prototype.enableRecalc = function() {
-      var instance;
-      instance = this;
-      return $('[data-trigger=recalc]', this.container).on('change keyup', function() {
-        instance.recalc(this);
-        return true;
-      });
-    };
-
     WorkspaceComponent.prototype.drawWorkspace = function() {
       var a, ref_ul, reference, references, _i, _len;
       $('#workspace_title', this.container).text(this.bodyTitle());
@@ -83,7 +55,76 @@
       }
     };
 
-    WorkspaceComponent.prototype.recalc = function(element) {};
+    WorkspaceComponent.prototype.initialiseContext = function() {
+      window.location.hash = this.contextName();
+      return this.applyParams();
+    };
+
+    WorkspaceComponent.prototype.applyParams = function() {
+      var encoded_param, name, parts, value, _i, _len, _ref;
+      _ref = window.location.search.replace('?', '').split('&');
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        encoded_param = _ref[_i];
+        parts = encoded_param.split('=');
+        if (parts.length === 2) {
+          name = decodeURIComponent(parts[0]);
+          value = decodeURIComponent(parts[1]);
+          $('[data-trigger=recalc]#' + name, this.container).val(value);
+        }
+      }
+      return true;
+    };
+
+    WorkspaceComponent.prototype.enableActions = function() {
+      var instance;
+      instance = this;
+      return $('[data-action]', this.container).on('click', function(e) {
+        var action;
+        e.preventDefault();
+        action = $(this).data('action');
+        return instance[action]();
+      });
+    };
+
+    WorkspaceComponent.prototype.enableRecalc = function() {
+      var instance;
+      instance = this;
+      $('[data-trigger=recalc]', this.container).on('change keyup', function() {
+        instance.recalc(this);
+        return true;
+      });
+      return instance.recalc();
+    };
+
+    WorkspaceComponent.prototype.updatePermalink = function() {
+      var item, permalink, search, value, _i, _len, _ref;
+      permalink = [];
+      _ref = $('[data-trigger=recalc]', this.container);
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        item = _ref[_i];
+        item = $(item);
+        value = item.val();
+        if (value && !item.attr('disabled')) {
+          permalink.push(item.attr('id') + '=' + encodeURIComponent(value));
+        }
+      }
+      if (permalink.length > 0) {
+        search = '?' + permalink.join('&');
+        $('#workspace_permalink').attr('href', search + '#' + this.contextName()).show();
+      } else {
+        search = '';
+        $('#workspace_permalink').hide();
+      }
+      return true;
+    };
+
+    WorkspaceComponent.prototype.recalc = function(element) {
+      return this.updatePermalink();
+    };
+
+    WorkspaceComponent.prototype.contextName = function() {
+      return '';
+    };
 
     WorkspaceComponent.prototype.bodyTitle = function() {
       return "About The Toolbox";
@@ -165,6 +206,7 @@
       if (this.calculated) {
         $('#' + this.calculated, this.container).attr('disabled', true);
       }
+      this.updatePermalink();
       return true;
     };
 
@@ -277,6 +319,7 @@
       if (this.calculated) {
         $('#' + this.calculated, this.container).attr('disabled', true);
       }
+      this.updatePermalink();
       return true;
     };
 
@@ -391,24 +434,29 @@
     };
 
     WebEncoderWorkspace.prototype.htmlEncode = function() {
-      return this.outElement.val($("<div></div>").text(this.inElement.val()).html());
+      this.outElement.val($("<div></div>").text(this.inElement.val()).html());
+      return this.recalc();
     };
 
     WebEncoderWorkspace.prototype.encodeURI = function() {
-      return this.outElement.val(encodeURI(this.inElement.val()));
+      this.outElement.val(encodeURI(this.inElement.val()));
+      return this.recalc();
     };
 
     WebEncoderWorkspace.prototype.encodeURIComponent = function() {
-      return this.outElement.val(encodeURIComponent(this.inElement.val()));
+      this.outElement.val(encodeURIComponent(this.inElement.val()));
+      return this.recalc();
     };
 
     WebEncoderWorkspace.prototype.uriEscape = function() {
-      return this.outElement.val(escape(this.inElement.val()));
+      this.outElement.val(escape(this.inElement.val()));
+      return this.recalc();
     };
 
     WebEncoderWorkspace.prototype.clearBoth = function() {
       this.outElement.val('');
-      return this.inElement.val('').focus();
+      this.inElement.val('').focus();
+      return this.recalc();
     };
 
     return WebEncoderWorkspace;

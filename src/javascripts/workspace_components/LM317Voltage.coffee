@@ -19,7 +19,7 @@ class root.LM317VoltageWorkspace extends root.WorkspaceComponent
     $('#r2',@container).val(result.r2 || '')
     @clearCalculated() if !result.vout && !result.r1 && !result.r2
     $('#' + @calculated,@container).attr('disabled',true) if @calculated
-
+    @updatePermalink()
     true
 
   determineResultElement: (vout,r1,r2)->

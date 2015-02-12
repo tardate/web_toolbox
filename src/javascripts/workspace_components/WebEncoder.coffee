@@ -53,16 +53,21 @@ class root.WebEncoderWorkspace extends root.WorkspaceComponent
 
   htmlEncode: ->
     @outElement.val($("<div></div>").text(@inElement.val()).html())
+    @recalc()
 
   encodeURI: ->
     @outElement.val(encodeURI(@inElement.val()))
+    @recalc()
 
   encodeURIComponent: ->
     @outElement.val(encodeURIComponent(@inElement.val()))
+    @recalc()
 
   uriEscape: ->
     @outElement.val(escape(@inElement.val()))
+    @recalc()
 
   clearBoth: ->
     @outElement.val('')
     @inElement.val('').focus()
+    @recalc()
