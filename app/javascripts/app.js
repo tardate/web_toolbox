@@ -397,6 +397,140 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
+  root.Parser = (function() {
+    Parser.tokenize = function(expression) {
+      var length, p, token, tokens;
+      tokens = [];
+      length = expression.length;
+      p = 0;
+      token = "";
+      while (p < length) {
+        if (expression[p].match(/[\+\|\(\)]/)) {
+          if (token) {
+            tokens.push(token);
+            token = "";
+          }
+          tokens.push(expression[p]);
+        }
+        if (expression[p].match(/[\d\.]/)) {
+          token = token + expression[p];
+        }
+        p += 1;
+      }
+      if (token) {
+        tokens.push(token);
+      }
+      return tokens;
+    };
+
+    function Parser(expression) {
+      this.tokens = root.Parser.tokenize(expression);
+    }
+
+    Parser.prototype.peek = function() {
+      return this.tokens[0] || null;
+    };
+
+    Parser.prototype.next = function() {
+      if (this.tokens.length > 0) {
+        return this.tokens.shift();
+      } else {
+        return null;
+      }
+    };
+
+    Parser.prototype.result = function() {
+      var peek, term;
+      term = this.parse_term();
+      while (1) {
+        peek = this.peek();
+        if (peek === "+" && this.next()) {
+          term = term + this.parse_term();
+        } else if (peek === null) {
+          return term;
+        } else {
+          throw "malformed";
+        }
+      }
+    };
+
+    Parser.prototype.parse_term = function() {
+      var factor, peek;
+      factor = this.parse_factor();
+      while (1) {
+        peek = this.peek();
+        if (peek === "|" && this.next()) {
+          factor = 1.0 / (1.0 / factor + 1.0 / this.parse_factor());
+        } else {
+          return factor;
+        }
+      }
+    };
+
+    Parser.prototype.parse_factor = function() {
+      var expr, next, p;
+      if (this.peek() === "(" && this.next()) {
+        expr = [];
+        if (this.tokens.indexOf(")") === -1) {
+          throw "incomplete brackets";
+        }
+        while ((next = this.next()) !== ")") {
+          expr.push(next);
+        }
+        p = new Parser(expr);
+        return p.result();
+      } else if (!isNaN(parseFloat(this.peek()))) {
+        return parseFloat(this.next());
+      } else {
+        throw "malformed expression";
+      }
+    };
+
+    return Parser;
+
+  })();
+
+  root.ResistorCalculatorWorkspace = (function(_super) {
+    __extends(ResistorCalculatorWorkspace, _super);
+
+    function ResistorCalculatorWorkspace() {
+      return ResistorCalculatorWorkspace.__super__.constructor.apply(this, arguments);
+    }
+
+    ResistorCalculatorWorkspace.calculated = null;
+
+    ResistorCalculatorWorkspace.prototype.calculate = function(expression) {
+      var parser, result;
+      parser = new root.Parser(expression);
+      result = parser.result();
+      return result;
+    };
+
+    ResistorCalculatorWorkspace.prototype.contextName = function() {
+      return 'ResistorCalculator';
+    };
+
+    ResistorCalculatorWorkspace.prototype.bodyTitle = function() {
+      return "Series and Parallel Resistor Caclulator";
+    };
+
+    ResistorCalculatorWorkspace.prototype.bodyTemplate = function() {
+      return "<p>\n  Enter the formula representing the resistor network. Separate parallel components with \"|\", and use () to group resistance values\n</p>\n<form class=\"form-horizontal\">\n  <div class=\"form-group\">\n    <label for=\"formula\" class=\"control-label\">Resistor network</label>\n    <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"formula\" placeholder=\"enter formula\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <button class=\"btn btn-default\" data-action=\"clear\">Clear..</button>\n  </div>\n</form>";
+    };
+
+    return ResistorCalculatorWorkspace;
+
+  })(root.WorkspaceComponent);
+
+}).call(this);
+
+(function() {
+  var root,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
   root.WebEncoderWorkspace = (function(_super) {
     __extends(WebEncoderWorkspace, _super);
 
