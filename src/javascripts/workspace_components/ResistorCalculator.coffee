@@ -1,10 +1,10 @@
 root = exports ? this
 
-class root.Parser
+class root.ComponentEquationParser
 
   @tokenize: (expression)->
     tokens = []
-    length = expression.length
+    length = expression && expression.length || 0
     p = 0
     token = ""
     while p < length
@@ -20,80 +20,67 @@ class root.Parser
     return tokens
 
   constructor: (expression) ->
-    @tokens = root.Parser.tokenize expression
+    @tokens = @constructor.tokenize expression
 
   peek: ->
     @tokens[0] || null
 
-  next: ->
+  pop: ->
     if @tokens.length > 0 then @tokens.shift() else null
 
-  result:->
-    term = @parse_term()
-    while 1
-      peek = @peek()
-
-      if peek is "+" and @next()
-        term = term + @parse_term()
-
-      else if peek is null
-        return term
-
-      else
-        throw "malformed"
-
-  parse_term: ->
-    factor = @parse_factor()
-    while 1
-      peek = @peek()
-      if peek is "|" and @next()
-        factor = 1.0/(1.0/factor + 1.0/@parse_factor())
-      else
-        return factor
-
-  parse_factor: ->
-
-    if @peek() is "(" and @next()
-      expr = []
-      throw "incomplete brackets" if @tokens.indexOf(")") is -1
-
-      expr.push next while (next = @next()) isnt ")"
-
-      p = new Parser(expr)
-
-      return p.result()
-
-    else if not isNaN(parseFloat @peek())
-      return parseFloat @next()
+  parse: (accumulator)->
+    accumulator ||= 0
+    peek = @peek()
+    peek_value = parseFloat peek
+    if not isNaN(peek_value) and @pop()
+      return @parse(peek_value)
+    else if peek is "+" and @pop()
+      return accumulator + @parse()
+    else if peek is "(" and @pop()
+      return @parse(@parse(accumulator))
+    else if peek is ")" and @pop()
+      return accumulator
+    else if peek is "|" and @pop()
+      return  1.0/(1.0/accumulator + 1.0/@parse())
     else
-      throw "malformed expression"
-
+      accumulator
 
 # series and parallel resistor calculator
 class root.ResistorCalculatorWorkspace extends root.WorkspaceComponent
 
-  @calculated: null
-
   calculate: (expression)->
-    parser = new root.Parser(expression)
-    result = parser.result()
-    return result
+    parser = new root.ComponentEquationParser(expression)
+    return parser.parse()
+
+  recalc: (element)->
+    req = @calculate( $('#formula',@container).val() )
+    $('#req',@container).text(req)
+    @updatePermalink()
 
   contextName: ->
     'ResistorCalculator'
 
   bodyTitle: ->
-    "Series and Parallel Resistor Caclulator"
+    "Series and Parallel Resistor Calculator"
 
   bodyTemplate: ->
     """
 <p>
-  Enter the formula representing the resistor network. Separate parallel components with "|", and use () to group resistance values
+  Enter the formula representing the resistor network.
+  <ul>
+    <li>Add series components with "+"</li>
+    <li>Add parallel components with "|"</li>
+    <li>Use () to group values</li>
+  </ul>
 </p>
-<form class="form-horizontal">
+<form>
   <div class="form-group">
     <label for="formula" class="control-label">Resistor network</label>
-    <input type="input" class="form-control" data-trigger="recalc" id="formula" placeholder="enter formula" autocomplete="off">
+    <input type="input" class="form-control" data-trigger="recalc" id="formula" placeholder="e.g: 3+10|10|(10+10)" autocomplete="off">
+  </div>
+  <div class="form-group">
+    <strong>Equivalent resistance:</strong>
+    <span id="req">0</span> &Omega;
   </div>
   <div class="form-group">
     <button class="btn btn-default" data-action="clear">Clear..</button>

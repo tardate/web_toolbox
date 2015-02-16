@@ -397,11 +397,11 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  root.Parser = (function() {
-    Parser.tokenize = function(expression) {
+  root.ComponentEquationParser = (function() {
+    ComponentEquationParser.tokenize = function(expression) {
       var length, p, token, tokens;
       tokens = [];
-      length = expression.length;
+      length = expression && expression.length || 0;
       p = 0;
       token = "";
       while (p < length) {
@@ -423,15 +423,15 @@
       return tokens;
     };
 
-    function Parser(expression) {
-      this.tokens = root.Parser.tokenize(expression);
+    function ComponentEquationParser(expression) {
+      this.tokens = this.constructor.tokenize(expression);
     }
 
-    Parser.prototype.peek = function() {
+    ComponentEquationParser.prototype.peek = function() {
       return this.tokens[0] || null;
     };
 
-    Parser.prototype.next = function() {
+    ComponentEquationParser.prototype.pop = function() {
       if (this.tokens.length > 0) {
         return this.tokens.shift();
       } else {
@@ -439,54 +439,27 @@
       }
     };
 
-    Parser.prototype.result = function() {
-      var peek, term;
-      term = this.parse_term();
-      while (1) {
-        peek = this.peek();
-        if (peek === "+" && this.next()) {
-          term = term + this.parse_term();
-        } else if (peek === null) {
-          return term;
-        } else {
-          throw "malformed";
-        }
-      }
-    };
-
-    Parser.prototype.parse_term = function() {
-      var factor, peek;
-      factor = this.parse_factor();
-      while (1) {
-        peek = this.peek();
-        if (peek === "|" && this.next()) {
-          factor = 1.0 / (1.0 / factor + 1.0 / this.parse_factor());
-        } else {
-          return factor;
-        }
-      }
-    };
-
-    Parser.prototype.parse_factor = function() {
-      var expr, next, p;
-      if (this.peek() === "(" && this.next()) {
-        expr = [];
-        if (this.tokens.indexOf(")") === -1) {
-          throw "incomplete brackets";
-        }
-        while ((next = this.next()) !== ")") {
-          expr.push(next);
-        }
-        p = new Parser(expr);
-        return p.result();
-      } else if (!isNaN(parseFloat(this.peek()))) {
-        return parseFloat(this.next());
+    ComponentEquationParser.prototype.parse = function(accumulator) {
+      var peek, peek_value;
+      accumulator || (accumulator = 0);
+      peek = this.peek();
+      peek_value = parseFloat(peek);
+      if (!isNaN(peek_value) && this.pop()) {
+        return this.parse(peek_value);
+      } else if (peek === "+" && this.pop()) {
+        return accumulator + this.parse();
+      } else if (peek === "(" && this.pop()) {
+        return this.parse(this.parse(accumulator));
+      } else if (peek === ")" && this.pop()) {
+        return accumulator;
+      } else if (peek === "|" && this.pop()) {
+        return 1.0 / (1.0 / accumulator + 1.0 / this.parse());
       } else {
-        throw "malformed expression";
+        return accumulator;
       }
     };
 
-    return Parser;
+    return ComponentEquationParser;
 
   })();
 
@@ -497,13 +470,17 @@
       return ResistorCalculatorWorkspace.__super__.constructor.apply(this, arguments);
     }
 
-    ResistorCalculatorWorkspace.calculated = null;
-
     ResistorCalculatorWorkspace.prototype.calculate = function(expression) {
-      var parser, result;
-      parser = new root.Parser(expression);
-      result = parser.result();
-      return result;
+      var parser;
+      parser = new root.ComponentEquationParser(expression);
+      return parser.parse();
+    };
+
+    ResistorCalculatorWorkspace.prototype.recalc = function(element) {
+      var req;
+      req = this.calculate($('#formula', this.container).val());
+      $('#req', this.container).text(req);
+      return this.updatePermalink();
     };
 
     ResistorCalculatorWorkspace.prototype.contextName = function() {
@@ -511,11 +488,11 @@
     };
 
     ResistorCalculatorWorkspace.prototype.bodyTitle = function() {
-      return "Series and Parallel Resistor Caclulator";
+      return "Series and Parallel Resistor Calculator";
     };
 
     ResistorCalculatorWorkspace.prototype.bodyTemplate = function() {
-      return "<p>\n  Enter the formula representing the resistor network. Separate parallel components with \"|\", and use () to group resistance values\n</p>\n<form class=\"form-horizontal\">\n  <div class=\"form-group\">\n    <label for=\"formula\" class=\"control-label\">Resistor network</label>\n    <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"formula\" placeholder=\"enter formula\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <button class=\"btn btn-default\" data-action=\"clear\">Clear..</button>\n  </div>\n</form>";
+      return "<p>\n  Enter the formula representing the resistor network.\n  <ul>\n    <li>Add series components with \"+\"</li>\n    <li>Add parallel components with \"|\"</li>\n    <li>Use () to group values</li>\n  </ul>\n</p>\n<form>\n  <div class=\"form-group\">\n    <label for=\"formula\" class=\"control-label\">Resistor network</label>\n    <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"formula\" placeholder=\"e.g: 3+10|10|(10+10)\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <strong>Equivalent resistance:</strong>\n    <span id=\"req\">0</span> &Omega;\n  </div>\n  <div class=\"form-group\">\n    <button class=\"btn btn-default\" data-action=\"clear\">Clear..</button>\n  </div>\n</form>";
     };
 
     return ResistorCalculatorWorkspace;
