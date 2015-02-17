@@ -12,6 +12,8 @@ describe("ResistorCalculatorWorkspace.calculate()", function() {
     expect(subject.calculate('(1+1)+(1+1)')).toEqual(4.0);
     expect(subject.calculate('((1+1)+(1+1))')).toEqual(4.0);
     expect(subject.calculate('500.0+(50+5)+5000')).toEqual(5555.0);
+    expect(subject.calculate("(((((6|((6|(1+2))+10))+2)|6)+9)|4)+2")).toEqual(5.0);
+    expect(subject.calculate('6+(18|(3+6))+10')).toEqual(22.0);
   });
 
   it("given simple parallel expression", function() {
