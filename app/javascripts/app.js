@@ -483,6 +483,10 @@
       return this.updatePermalink();
     };
 
+    ResistorCalculatorWorkspace.prototype.clear = function() {
+      return $('#formula', this.container).val('');
+    };
+
     ResistorCalculatorWorkspace.prototype.contextName = function() {
       return 'ResistorCalculator';
     };

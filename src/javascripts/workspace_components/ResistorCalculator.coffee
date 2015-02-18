@@ -57,6 +57,9 @@ class root.ResistorCalculatorWorkspace extends root.WorkspaceComponent
     $('#req',@container).text(req)
     @updatePermalink()
 
+  clear: ->
+    $('#formula',@container).val('')
+
   contextName: ->
     'ResistorCalculator'
 
