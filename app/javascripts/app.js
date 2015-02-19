@@ -131,7 +131,7 @@
     };
 
     WorkspaceComponent.prototype.bodyTemplate = function() {
-      return "<p>\nA collection of my most frequently used tools and references for what is sparking my interest at the time.\n</p>\n<p>\nNecessarily a never-ending work-in-progress&mdash;this site is itself a reboot/reworking of stuff that came before&mdash;it also a bit of a playgound\nfor me to practice my minimalist javascripty/webby fu. So be forewarned! And have a good day ;-)\n</p>";
+      return "<p>\nA collection of my most frequently used tools and references for what is sparking my interest at the time.\n</p>\n<p>\nNecessarily a never-ending work-in-progress&mdash;this site is itself a reboot/reworking of stuff that came before&mdash;it also a bit of a coding playgound.\n</p>";
     };
 
     WorkspaceComponent.prototype.references = function() {
