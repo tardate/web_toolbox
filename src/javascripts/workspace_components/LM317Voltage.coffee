@@ -103,6 +103,10 @@ class root.LM317VoltageWorkspace extends root.WorkspaceComponent
         name: "LM317 Datasheet"
       },
       {
+        href: 'http://www.reuk.co.uk/LM317-Voltage-Calculator.htm',
+        name: "Another LM317 Voltage Calculator"
+      },
+      {
         href: 'https://github.com/tardate/LittleArduinoProjects/tree/master/Electronics101/Power317',
         name: "Sample LM317 Arduino Project"
       }
