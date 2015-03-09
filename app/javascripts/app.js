@@ -294,6 +294,93 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
+  root.MicrophoneCalculatorWorkspace = (function(_super) {
+    __extends(MicrophoneCalculatorWorkspace, _super);
+
+    function MicrophoneCalculatorWorkspace() {
+      return MicrophoneCalculatorWorkspace.__super__.constructor.apply(this, arguments);
+    }
+
+    MicrophoneCalculatorWorkspace.prototype.contextName = function() {
+      return 'MicrophoneCalculator';
+    };
+
+    MicrophoneCalculatorWorkspace.prototype.recalc = function(element) {
+      var result, sensitivity, transfer_factor;
+      sensitivity = parseFloat($('#sensitivity', this.container).val());
+      transfer_factor = parseFloat($('#transfer_factor', this.container).val());
+      if (element && element.id) {
+        if (element.id === 'sensitivity') {
+          transfer_factor = NaN;
+        }
+        if (element.id === 'transfer_factor') {
+          sensitivity = NaN;
+        }
+      }
+      result = this.calculateNewValues(sensitivity, transfer_factor);
+      if (!(isNaN(result.sensitivity) && isNaN(result.transfer_factor))) {
+        $('#sensitivity', this.container).val(result.sensitivity || '');
+        $('#transfer_factor', this.container).val(result.transfer_factor || '');
+      }
+      this.updatePermalink();
+      return true;
+    };
+
+    MicrophoneCalculatorWorkspace.prototype.calculateNewValues = function(sensitivity, transfer_factor) {
+      var new_sensitivity, new_transfer_factor;
+      new_sensitivity = sensitivity;
+      new_transfer_factor = transfer_factor;
+      if (!isNaN(transfer_factor)) {
+        new_sensitivity = Math.round(10000 * 20 * Math.log(transfer_factor * 0.001) / Math.log(10)) / 10000;
+      }
+      if (!isNaN(sensitivity)) {
+        new_transfer_factor = Math.round(10000 * 1000 * Math.pow(10, sensitivity / 20)) / 10000;
+      }
+      return {
+        sensitivity: new_sensitivity,
+        transfer_factor: new_transfer_factor
+      };
+    };
+
+    MicrophoneCalculatorWorkspace.prototype.clear = function() {
+      $('#sensitivity', this.container).val('');
+      return $('#transfer_factor', this.container).val('');
+    };
+
+    MicrophoneCalculatorWorkspace.prototype.clearCalculated = function() {
+      return $('[data-trigger=recalc]', this.container).attr('disabled', false);
+    };
+
+    MicrophoneCalculatorWorkspace.prototype.bodyTitle = function() {
+      return "Microphone Sensitivity Calculator";
+    };
+
+    MicrophoneCalculatorWorkspace.prototype.bodyTemplate = function() {
+      return "<row>\n  <div class=\"col-md-6\">\n    <p>\n      Enter one value to calculate the other...\n    </p>\n    <form class=\"form-horizontal\">\n      <div class=\"form-group\">\n        <label for=\"sensitivity\" class=\"control-label\">Sensitivity (dB)</label>\n        <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"sensitivity\" placeholder=\"dB ref 1V/Pa\" autocomplete=\"off\">\n      </div>\n      <div class=\"form-group\">\n        <label for=\"transfer_factor\" class=\"control-label\">Transfer Factor (mV/Pascal)</label>\n        <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"transfer_factor\" placeholder=\"mV/Pa\" autocomplete=\"off\">\n      </div>\n      <div class=\"form-group\">\n        <button class=\"btn btn-default\" data-action=\"clear\">Clear..</button>\n      </div>\n    </form>\n  </div>\n  <div class=\"col-md-6\">\n  </div>\n</row>";
+    };
+
+    MicrophoneCalculatorWorkspace.prototype.references = function() {
+      return [
+        {
+          href: 'http://www.cui.com/product/resource/cma-4544pf-w.pdf',
+          name: "CMA-4544PF-W electret sample datasheet"
+        }
+      ];
+    };
+
+    return MicrophoneCalculatorWorkspace;
+
+  })(root.WorkspaceComponent);
+
+}).call(this);
+
+(function() {
+  var root,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
   root.OhmsLawWorkspace = (function(_super) {
     __extends(OhmsLawWorkspace, _super);
 
