@@ -88,7 +88,7 @@ class root.LM317VoltageWorkspace extends root.WorkspaceComponent
     </form>
   </div>
   <div class="col-md-6">
-    <h4>Typcial Application</h4>
+    <h4>Typical Application</h4>
     <p class="text-center">
       <img src="app/images/lm317_overview.png" width="400">
     </p>
