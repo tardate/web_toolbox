@@ -9,4 +9,4 @@ class root.AppController
     root.WorkspaceComponent.activate()
 
 jQuery ->
-  new root.AppController.activate()
+  root.AppController.activate()

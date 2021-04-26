@@ -4,9 +4,9 @@ root = exports ? this
 class root.WebEncoderWorkspace extends root.WorkspaceComponent
 
   constructor: ->
-    super
-    @outElement = $('#outText',@container)
-    @inElement = $('#inText',@container)
+    super()
+    @outElement = $('#outText', @container)
+    @inElement = $('#inText', @container)
 
   contextName: ->
     'WebEncoder'

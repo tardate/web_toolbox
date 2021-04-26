@@ -3,8 +3,34 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  root.WorkspaceComponent = (function() {
-    WorkspaceComponent.activate = function() {
+  // application controller - co-ordinates the marshalling of user input and rendering of the web page view
+  root.AppController = class AppController {
+    static activate() {
+      try {
+        $('[data-toggle="tooltip"]').tooltip({
+          container: 'body'
+        });
+      } catch (error) {}
+      return root.WorkspaceComponent.activate();
+    }
+
+  };
+
+  jQuery(function() {
+    return root.AppController.activate();
+  });
+
+}).call(this);
+
+(function() {
+  var root;
+
+  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
+  // base class for something that operates in a common #workspace panel
+  root.WorkspaceComponent = class WorkspaceComponent {
+    // Command: activates workspace controller
+    static activate() {
       var hash;
       $('body').bind('workspace.activate', function(e, workspaceData) {
         return eval('new ' + workspaceData.name + '()');
@@ -25,9 +51,13 @@
       } else {
         return new root.WorkspaceComponent();
       }
-    };
+    }
 
-    function WorkspaceComponent() {
+    // Default constructor initialises the component attached to a common #workspace element
+    // It expects two elements under #workspace:
+    // #workspace_title: element that should contain title text
+    // #workspace_content: element the component will render itself within
+    constructor() {
       this.container = $('#workspace');
       this.drawWorkspace();
       this.initialiseContext();
@@ -35,15 +65,15 @@
       this.enableRecalc();
     }
 
-    WorkspaceComponent.prototype.drawWorkspace = function() {
-      var a, ref_ul, reference, references, _i, _len;
+    drawWorkspace() {
+      var a, i, len, ref_ul, reference, references;
       $('#workspace_title', this.container).text(this.bodyTitle());
       $('#workspace_content', this.container).html(this.bodyTemplate());
       ref_ul = $('#workspace_references ul.reflist', this.container);
       ref_ul.html('');
       if (references = this.references()) {
-        for (_i = 0, _len = references.length; _i < _len; _i++) {
-          reference = references[_i];
+        for (i = 0, len = references.length; i < len; i++) {
+          reference = references[i];
           a = $('<a></a>');
           a.attr('href', reference.href);
           a.text(reference.name);
@@ -53,18 +83,18 @@
       } else {
         return $('#workspace_references', this.container).hide();
       }
-    };
+    }
 
-    WorkspaceComponent.prototype.initialiseContext = function() {
+    initialiseContext() {
       window.location.hash = this.contextName();
       return this.applyParams();
-    };
+    }
 
-    WorkspaceComponent.prototype.applyParams = function() {
-      var encoded_param, name, parts, value, _i, _len, _ref;
-      _ref = window.location.search.replace('?', '').split('&');
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        encoded_param = _ref[_i];
+    applyParams() {
+      var encoded_param, i, len, name, parts, ref, value;
+      ref = window.location.search.replace('?', '').split('&');
+      for (i = 0, len = ref.length; i < len; i++) {
+        encoded_param = ref[i];
         parts = encoded_param.split('=');
         if (parts.length === 2) {
           name = decodeURIComponent(parts[0]);
@@ -73,9 +103,9 @@
         }
       }
       return true;
-    };
+    }
 
-    WorkspaceComponent.prototype.enableActions = function() {
+    enableActions() {
       var instance;
       instance = this;
       return $('[data-action]', this.container).on('click', function(e) {
@@ -84,9 +114,9 @@
         action = $(this).data('action');
         return instance[action]();
       });
-    };
+    }
 
-    WorkspaceComponent.prototype.enableRecalc = function() {
+    enableRecalc() {
       var instance;
       instance = this;
       $('[data-trigger=recalc]', this.container).on('change keyup', function() {
@@ -94,14 +124,14 @@
         return true;
       });
       return instance.recalc();
-    };
+    }
 
-    WorkspaceComponent.prototype.updatePermalink = function() {
-      var item, permalink, search, value, _i, _len, _ref;
+    updatePermalink() {
+      var i, item, len, permalink, ref, search, value;
       permalink = [];
-      _ref = $('[data-trigger=recalc]', this.container);
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        item = _ref[_i];
+      ref = $('[data-trigger=recalc]', this.container);
+      for (i = 0, len = ref.length; i < len; i++) {
+        item = ref[i];
         item = $(item);
         value = item.val();
         if (value && !item.attr('disabled')) {
@@ -116,31 +146,40 @@
         $('#workspace_permalink').hide();
       }
       return true;
-    };
+    }
 
-    WorkspaceComponent.prototype.recalc = function(element) {
+    // override in subclasses to implement workspace-specific recalc
+    recalc(element) {
       return this.updatePermalink();
-    };
+    }
 
-    WorkspaceComponent.prototype.contextName = function() {
+    // override in subclasses
+    contextName() {
       return '';
-    };
+    }
 
-    WorkspaceComponent.prototype.bodyTitle = function() {
+    // override in subclasses to define workspace-specific title
+    bodyTitle() {
       return "About The Toolbox";
-    };
+    }
 
-    WorkspaceComponent.prototype.bodyTemplate = function() {
-      return "<p>\nA collection of my most frequently used tools and references for what is sparking my interest at the time.\n</p>\n<p>\nNecessarily a never-ending work-in-progress&mdash;this site is itself a reboot/reworking of stuff that came before&mdash;it also a bit of a coding playgound.\n</p>";
-    };
+    // override in subclasses to define workspace-specific body
+    bodyTemplate() {
+      // TODO: maybe switch to handlebars?
+      return `<p>
+A collection of my most frequently used tools and references for what is sparking my interest at the time.
+</p>
+<p>
+Necessarily a never-ending work-in-progress&mdash;this site is itself a reboot/reworking of stuff that came before&mdash;it also a bit of a coding playgound.
+</p>`;
+    }
 
-    WorkspaceComponent.prototype.references = function() {
+    // override in subclasses to define workspace-specific reference list
+    references() {
       return null;
-    };
+    }
 
-    return WorkspaceComponent;
-
-  })();
+  };
 
 }).call(this);
 
@@ -149,172 +188,169 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  root.AppController = (function() {
-    function AppController() {}
+  root.LM317VoltageWorkspace = (function() {
+    // LM317 adjustable regulator calculator
+    class LM317VoltageWorkspace extends root.WorkspaceComponent {
+      contextName() {
+        return 'LM317Voltage';
+      }
 
-    AppController.activate = function() {
-      try {
-        $('[data-toggle="tooltip"]').tooltip({
-          container: 'body'
-        });
-      } catch (_error) {}
-      return root.WorkspaceComponent.activate();
+      recalc(element) {
+        var r1, r2, result, vout;
+        vout = parseFloat($('#vout', this.container).val());
+        r1 = parseFloat($('#r1', this.container).val());
+        r2 = parseFloat($('#r2', this.container).val());
+        result = this.calculateNewValues(vout, r1, r2);
+        $('#vout', this.container).val(result.vout || '');
+        $('#r1', this.container).val(result.r1 || '');
+        $('#r2', this.container).val(result.r2 || '');
+        if (!result.vout && !result.r1 && !result.r2) {
+          this.clearCalculated();
+        }
+        if (this.calculated) {
+          $('#' + this.calculated, this.container).attr('disabled', true);
+        }
+        this.updatePermalink();
+        return true;
+      }
+
+      determineResultElement(vout, r1, r2) {
+        var result;
+        if (vout && r1 && !r2) {
+          result = 'r2';
+        }
+        if (vout && !r1 && r2) {
+          result || (result = 'r1');
+        }
+        if (!vout && r1 && r2) {
+          result || (result = 'vout');
+        }
+        return result;
+      }
+
+      calculateNewValues(vout, r1, r2) {
+        var new_r1, new_r2, new_vout;
+        this.calculated || (this.calculated = this.determineResultElement(vout, r1, r2));
+        new_vout = vout;
+        new_r1 = r1;
+        new_r2 = r2;
+        if (this.calculated === 'r1') {
+          // VOUT = 1.25 * ( 1 + R2/R1 )
+          // R2 = R1 ( VOUT / 1.25 - 1 )
+          // R1 = R2 / ( VOUT / 1.25 - 1 )
+          new_r1 = new_r2 / (new_vout / 1.25 - 1);
+        }
+        if (this.calculated === 'r2') {
+          new_r2 = new_r1 * (new_vout / 1.25 - 1);
+        }
+        if (this.calculated === 'vout') {
+          new_vout = 1.25 * (1 + new_r2 / new_r1);
+        }
+        return {
+          vout: new_vout,
+          r1: new_r1,
+          r2: new_r2
+        };
+      }
+
+      clear() {
+        $('#vout', this.container).val('');
+        $('#r1', this.container).val('');
+        $('#r2', this.container).val('');
+        return this.clearCalculated();
+      }
+
+      clearCalculated() {
+        this.calculated = null;
+        return $('[data-trigger=recalc]', this.container).attr('disabled', false);
+      }
+
+      bodyTitle() {
+        return "LM317 Voltage Calculator";
+      }
+
+      bodyTemplate() {
+        return `<row>
+  <div class="col-md-6">
+    <p>
+      Given
+      <strong>Vout = 1.25 * ( 1 + R2/R1 )</strong>, enter any two values to calculate the other...
+    </p>
+    <form class="form-horizontal">
+      <div class="form-group">
+        <label for="voltage" class="control-label">Vout</label>
+        <input type="input" class="form-control" data-trigger="recalc" id="vout" placeholder="1.2 to 37 volts" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="resistance" class="control-label">R1</label>
+        <input type="input" class="form-control" data-trigger="recalc" id="r1" placeholder="100&Omega; to 1k&Omega;" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="current" class="control-label">R2</label>
+        <input type="input" class="form-control" data-trigger="recalc" id="r2" placeholder="&Omega;" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <button class="btn btn-default" data-action="clear">Clear..</button>
+      </div>
+    </form>
+  </div>
+  <div class="col-md-6">
+    <h4>Typical Application</h4>
+    <p class="text-center">
+      <img src="app/images/lm317_overview.png" width="400">
+    </p>
+  </div>
+</row>`;
+      }
+
+      references() {
+        return [
+          {
+            href: 'http://www.futurlec.com/Linear/LM317T.shtml',
+            name: "LM317 Datasheet"
+          },
+          {
+            href: 'http://www.reuk.co.uk/LM317-Voltage-Calculator.htm',
+            name: "Another LM317 Voltage Calculator"
+          },
+          {
+            href: 'https://github.com/tardate/LittleArduinoProjects/tree/master/Electronics101/Power317',
+            name: "Sample LM317 Arduino Project"
+          }
+        ];
+      }
+
     };
-
-    return AppController;
-
-  })();
-
-  jQuery(function() {
-    return new root.AppController.activate();
-  });
-
-}).call(this);
-
-(function() {
-  var root,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  root = typeof exports !== "undefined" && exports !== null ? exports : this;
-
-  root.LM317VoltageWorkspace = (function(_super) {
-    __extends(LM317VoltageWorkspace, _super);
-
-    function LM317VoltageWorkspace() {
-      return LM317VoltageWorkspace.__super__.constructor.apply(this, arguments);
-    }
 
     LM317VoltageWorkspace.calculated = null;
 
-    LM317VoltageWorkspace.prototype.contextName = function() {
-      return 'LM317Voltage';
-    };
-
-    LM317VoltageWorkspace.prototype.recalc = function(element) {
-      var r1, r2, result, vout;
-      vout = parseFloat($('#vout', this.container).val());
-      r1 = parseFloat($('#r1', this.container).val());
-      r2 = parseFloat($('#r2', this.container).val());
-      result = this.calculateNewValues(vout, r1, r2);
-      $('#vout', this.container).val(result.vout || '');
-      $('#r1', this.container).val(result.r1 || '');
-      $('#r2', this.container).val(result.r2 || '');
-      if (!result.vout && !result.r1 && !result.r2) {
-        this.clearCalculated();
-      }
-      if (this.calculated) {
-        $('#' + this.calculated, this.container).attr('disabled', true);
-      }
-      this.updatePermalink();
-      return true;
-    };
-
-    LM317VoltageWorkspace.prototype.determineResultElement = function(vout, r1, r2) {
-      var result;
-      if (vout && r1 && !r2) {
-        result = 'r2';
-      }
-      if (vout && !r1 && r2) {
-        result || (result = 'r1');
-      }
-      if (!vout && r1 && r2) {
-        result || (result = 'vout');
-      }
-      return result;
-    };
-
-    LM317VoltageWorkspace.prototype.calculateNewValues = function(vout, r1, r2) {
-      var new_r1, new_r2, new_vout;
-      this.calculated || (this.calculated = this.determineResultElement(vout, r1, r2));
-      new_vout = vout;
-      new_r1 = r1;
-      new_r2 = r2;
-      if (this.calculated === 'r1') {
-        new_r1 = new_r2 / (new_vout / 1.25 - 1);
-      }
-      if (this.calculated === 'r2') {
-        new_r2 = new_r1 * (new_vout / 1.25 - 1);
-      }
-      if (this.calculated === 'vout') {
-        new_vout = 1.25 * (1 + new_r2 / new_r1);
-      }
-      return {
-        vout: new_vout,
-        r1: new_r1,
-        r2: new_r2
-      };
-    };
-
-    LM317VoltageWorkspace.prototype.clear = function() {
-      $('#vout', this.container).val('');
-      $('#r1', this.container).val('');
-      $('#r2', this.container).val('');
-      return this.clearCalculated();
-    };
-
-    LM317VoltageWorkspace.prototype.clearCalculated = function() {
-      this.calculated = null;
-      return $('[data-trigger=recalc]', this.container).attr('disabled', false);
-    };
-
-    LM317VoltageWorkspace.prototype.bodyTitle = function() {
-      return "LM317 Voltage Calculator";
-    };
-
-    LM317VoltageWorkspace.prototype.bodyTemplate = function() {
-      return "<row>\n  <div class=\"col-md-6\">\n    <p>\n      Given\n      <strong>Vout = 1.25 * ( 1 + R2/R1 )</strong>, enter any two values to calculate the other...\n    </p>\n    <form class=\"form-horizontal\">\n      <div class=\"form-group\">\n        <label for=\"voltage\" class=\"control-label\">Vout</label>\n        <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"vout\" placeholder=\"1.2 to 37 volts\" autocomplete=\"off\">\n      </div>\n      <div class=\"form-group\">\n        <label for=\"resistance\" class=\"control-label\">R1</label>\n        <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"r1\" placeholder=\"100&Omega; to 1k&Omega;\" autocomplete=\"off\">\n      </div>\n      <div class=\"form-group\">\n        <label for=\"current\" class=\"control-label\">R2</label>\n        <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"r2\" placeholder=\"&Omega;\" autocomplete=\"off\">\n      </div>\n      <div class=\"form-group\">\n        <button class=\"btn btn-default\" data-action=\"clear\">Clear..</button>\n      </div>\n    </form>\n  </div>\n  <div class=\"col-md-6\">\n    <h4>Typical Application</h4>\n    <p class=\"text-center\">\n      <img src=\"app/images/lm317_overview.png\" width=\"400\">\n    </p>\n  </div>\n</row>";
-    };
-
-    LM317VoltageWorkspace.prototype.references = function() {
-      return [
-        {
-          href: 'http://www.futurlec.com/Linear/LM317T.shtml',
-          name: "LM317 Datasheet"
-        }, {
-          href: 'http://www.reuk.co.uk/LM317-Voltage-Calculator.htm',
-          name: "Another LM317 Voltage Calculator"
-        }, {
-          href: 'https://github.com/tardate/LittleArduinoProjects/tree/master/Electronics101/Power317',
-          name: "Sample LM317 Arduino Project"
-        }
-      ];
-    };
-
     return LM317VoltageWorkspace;
 
-  })(root.WorkspaceComponent);
+  }).call(this);
 
 }).call(this);
 
 (function() {
-  var root,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  var root;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  root.MicrophoneCalculatorWorkspace = (function(_super) {
-    __extends(MicrophoneCalculatorWorkspace, _super);
-
-    function MicrophoneCalculatorWorkspace() {
-      return MicrophoneCalculatorWorkspace.__super__.constructor.apply(this, arguments);
+  // Microphone sensitivity calculator
+  root.MicrophoneCalculatorWorkspace = class MicrophoneCalculatorWorkspace extends root.WorkspaceComponent {
+    contextName() {
+      return 'MicrophoneCalculator';
     }
 
-    MicrophoneCalculatorWorkspace.prototype.contextName = function() {
-      return 'MicrophoneCalculator';
-    };
-
-    MicrophoneCalculatorWorkspace.prototype.recalc = function(element) {
+    recalc(element) {
       var result, sensitivity, transfer_factor;
       sensitivity = parseFloat($('#sensitivity', this.container).val());
       transfer_factor = parseFloat($('#transfer_factor', this.container).val());
       if (element && element.id) {
         if (element.id === 'sensitivity') {
-          transfer_factor = NaN;
+          transfer_factor = 0/0;
         }
         if (element.id === 'transfer_factor') {
-          sensitivity = NaN;
+          sensitivity = 0/0;
         }
       }
       result = this.calculateNewValues(sensitivity, transfer_factor);
@@ -324,13 +360,15 @@
       }
       this.updatePermalink();
       return true;
-    };
+    }
 
-    MicrophoneCalculatorWorkspace.prototype.calculateNewValues = function(sensitivity, transfer_factor) {
+    calculateNewValues(sensitivity, transfer_factor) {
       var new_sensitivity, new_transfer_factor;
       new_sensitivity = sensitivity;
       new_transfer_factor = transfer_factor;
       if (!isNaN(transfer_factor)) {
+        // Sensitivity = 20×log(Transfer factor)
+        // Transfer factor = 10 ^ Sensitivity / 20
         new_sensitivity = Math.round(10000 * 20 * Math.log(transfer_factor * 0.001) / Math.log(10)) / 10000;
       }
       if (!isNaN(sensitivity)) {
@@ -340,155 +378,188 @@
         sensitivity: new_sensitivity,
         transfer_factor: new_transfer_factor
       };
-    };
+    }
 
-    MicrophoneCalculatorWorkspace.prototype.clear = function() {
+    clear() {
       $('#sensitivity', this.container).val('');
       return $('#transfer_factor', this.container).val('');
-    };
+    }
 
-    MicrophoneCalculatorWorkspace.prototype.clearCalculated = function() {
+    clearCalculated() {
       return $('[data-trigger=recalc]', this.container).attr('disabled', false);
-    };
+    }
 
-    MicrophoneCalculatorWorkspace.prototype.bodyTitle = function() {
+    bodyTitle() {
       return "Microphone Sensitivity Calculator";
-    };
+    }
 
-    MicrophoneCalculatorWorkspace.prototype.bodyTemplate = function() {
-      return "<row>\n  <div class=\"col-md-6\">\n    <p>\n      Enter one value to calculate the other...\n    </p>\n    <form class=\"form-horizontal\">\n      <div class=\"form-group\">\n        <label for=\"sensitivity\" class=\"control-label\">Sensitivity (dB)</label>\n        <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"sensitivity\" placeholder=\"dB ref 1V/Pa\" autocomplete=\"off\">\n      </div>\n      <div class=\"form-group\">\n        <label for=\"transfer_factor\" class=\"control-label\">Transfer Factor (mV/Pascal)</label>\n        <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"transfer_factor\" placeholder=\"mV/Pa\" autocomplete=\"off\">\n      </div>\n      <div class=\"form-group\">\n        <button class=\"btn btn-default\" data-action=\"clear\">Clear..</button>\n      </div>\n    </form>\n  </div>\n  <div class=\"col-md-6\">\n  </div>\n</row>";
-    };
+    bodyTemplate() {
+      return `<row>
+  <div class="col-md-6">
+    <p>
+      Enter one value to calculate the other...
+    </p>
+    <form class="form-horizontal">
+      <div class="form-group">
+        <label for="sensitivity" class="control-label">Sensitivity (dB)</label>
+        <input type="input" class="form-control" data-trigger="recalc" id="sensitivity" placeholder="dB ref 1V/Pa" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="transfer_factor" class="control-label">Transfer Factor (mV/Pascal)</label>
+        <input type="input" class="form-control" data-trigger="recalc" id="transfer_factor" placeholder="mV/Pa" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <button class="btn btn-default" data-action="clear">Clear..</button>
+      </div>
+    </form>
+  </div>
+  <div class="col-md-6">
+  </div>
+</row>`;
+    }
 
-    MicrophoneCalculatorWorkspace.prototype.references = function() {
+    references() {
       return [
         {
           href: 'http://www.cui.com/product/resource/cma-4544pf-w.pdf',
           name: "CMA-4544PF-W electret sample datasheet"
         }
       ];
-    };
+    }
 
-    return MicrophoneCalculatorWorkspace;
-
-  })(root.WorkspaceComponent);
+  };
 
 }).call(this);
 
 (function() {
-  var root,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  var root;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  root.OhmsLawWorkspace = (function(_super) {
-    __extends(OhmsLawWorkspace, _super);
+  root.OhmsLawWorkspace = (function() {
+    // ohms law calculator
+    class OhmsLawWorkspace extends root.WorkspaceComponent {
+      contextName() {
+        return 'OhmsLaw';
+      }
 
-    function OhmsLawWorkspace() {
-      return OhmsLawWorkspace.__super__.constructor.apply(this, arguments);
-    }
+      recalc(element) {
+        var current, resistance, result, voltage;
+        voltage = parseFloat($('#voltage', this.container).val());
+        current = parseFloat($('#current', this.container).val());
+        resistance = parseFloat($('#resistance', this.container).val());
+        result = this.calculateNewValues(voltage, current, resistance);
+        $('#voltage', this.container).val(result.voltage || '');
+        $('#current', this.container).val(result.current || '');
+        $('#resistance', this.container).val(result.resistance || '');
+        if (!result.voltage && !result.current && !result.resistance) {
+          this.clearCalculated();
+        }
+        if (this.calculated) {
+          $('#' + this.calculated, this.container).attr('disabled', true);
+        }
+        this.updatePermalink();
+        return true;
+      }
+
+      determineResultElement(voltage, current, resistance) {
+        var result;
+        if (voltage && current && !resistance) {
+          result = 'resistance';
+        }
+        if (voltage && !current && resistance) {
+          result || (result = 'current');
+        }
+        if (!voltage && current && resistance) {
+          result || (result = 'voltage');
+        }
+        return result;
+      }
+
+      calculateNewValues(voltage, current, resistance) {
+        this.calculated || (this.calculated = this.determineResultElement(voltage, current, resistance));
+        if (this.calculated === 'voltage') {
+          // v = ir
+          voltage = current * resistance;
+        }
+        if (this.calculated === 'current') {
+          current = voltage / resistance;
+        }
+        if (this.calculated === 'resistance') {
+          resistance = voltage / current;
+        }
+        return {
+          voltage: voltage,
+          current: current,
+          resistance: resistance
+        };
+      }
+
+      clear() {
+        $('#voltage', this.container).val('');
+        $('#current', this.container).val('');
+        $('#resistance', this.container).val('');
+        return this.clearCalculated();
+      }
+
+      clearCalculated() {
+        this.calculated = null;
+        return $('[data-trigger=recalc]', this.container).attr('disabled', false);
+      }
+
+      bodyTitle() {
+        return "Ohm's Law Calculator";
+      }
+
+      bodyTemplate() {
+        return `<p>
+  Enter any two values to calculate the other...
+</p>
+<form class="form-inline">
+  <div class="form-group">
+    <label for="voltage" class="control-label">V</label>
+    <input type="input" class="form-control" data-trigger="recalc" id="voltage" placeholder="volts" autocomplete="off">
+  </div>
+  <div class="form-group">
+    <label for="current" class="control-label">= i</label>
+    <input type="input" class="form-control" data-trigger="recalc" id="current" placeholder="amps" autocomplete="off">
+  </div>
+  <div class="form-group">
+    <label for="resistance" class="control-label">x R</label>
+    <input type="input" class="form-control" data-trigger="recalc" id="resistance" placeholder="&Omega;" autocomplete="off">
+  </div>
+  <div class="form-group">
+    <button class="btn btn-default" data-action="clear">Clear..</button>
+  </div>
+</form>`;
+      }
+
+      references() {
+        return [
+          {
+            href: 'http://en.wikipedia.org/wiki/Ohm%27s_law',
+            name: "Ohm's law on Wikipedia"
+          }
+        ];
+      }
+
+    };
 
     OhmsLawWorkspace.calculated = null;
 
-    OhmsLawWorkspace.prototype.contextName = function() {
-      return 'OhmsLaw';
-    };
-
-    OhmsLawWorkspace.prototype.recalc = function(element) {
-      var current, resistance, result, voltage;
-      voltage = parseFloat($('#voltage', this.container).val());
-      current = parseFloat($('#current', this.container).val());
-      resistance = parseFloat($('#resistance', this.container).val());
-      result = this.calculateNewValues(voltage, current, resistance);
-      $('#voltage', this.container).val(result.voltage || '');
-      $('#current', this.container).val(result.current || '');
-      $('#resistance', this.container).val(result.resistance || '');
-      if (!result.voltage && !result.current && !result.resistance) {
-        this.clearCalculated();
-      }
-      if (this.calculated) {
-        $('#' + this.calculated, this.container).attr('disabled', true);
-      }
-      this.updatePermalink();
-      return true;
-    };
-
-    OhmsLawWorkspace.prototype.determineResultElement = function(voltage, current, resistance) {
-      var result;
-      if (voltage && current && !resistance) {
-        result = 'resistance';
-      }
-      if (voltage && !current && resistance) {
-        result || (result = 'current');
-      }
-      if (!voltage && current && resistance) {
-        result || (result = 'voltage');
-      }
-      return result;
-    };
-
-    OhmsLawWorkspace.prototype.calculateNewValues = function(voltage, current, resistance) {
-      this.calculated || (this.calculated = this.determineResultElement(voltage, current, resistance));
-      if (this.calculated === 'voltage') {
-        voltage = current * resistance;
-      }
-      if (this.calculated === 'current') {
-        current = voltage / resistance;
-      }
-      if (this.calculated === 'resistance') {
-        resistance = voltage / current;
-      }
-      return {
-        voltage: voltage,
-        current: current,
-        resistance: resistance
-      };
-    };
-
-    OhmsLawWorkspace.prototype.clear = function() {
-      $('#voltage', this.container).val('');
-      $('#current', this.container).val('');
-      $('#resistance', this.container).val('');
-      return this.clearCalculated();
-    };
-
-    OhmsLawWorkspace.prototype.clearCalculated = function() {
-      this.calculated = null;
-      return $('[data-trigger=recalc]', this.container).attr('disabled', false);
-    };
-
-    OhmsLawWorkspace.prototype.bodyTitle = function() {
-      return "Ohm's Law Calculator";
-    };
-
-    OhmsLawWorkspace.prototype.bodyTemplate = function() {
-      return "<p>\n  Enter any two values to calculate the other...\n</p>\n<form class=\"form-inline\">\n  <div class=\"form-group\">\n    <label for=\"voltage\" class=\"control-label\">V</label>\n    <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"voltage\" placeholder=\"volts\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <label for=\"current\" class=\"control-label\">= i</label>\n    <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"current\" placeholder=\"amps\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <label for=\"resistance\" class=\"control-label\">x R</label>\n    <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"resistance\" placeholder=\"&Omega;\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <button class=\"btn btn-default\" data-action=\"clear\">Clear..</button>\n  </div>\n</form>";
-    };
-
-    OhmsLawWorkspace.prototype.references = function() {
-      return [
-        {
-          href: 'http://en.wikipedia.org/wiki/Ohm%27s_law',
-          name: "Ohm's law on Wikipedia"
-        }
-      ];
-    };
-
     return OhmsLawWorkspace;
 
-  })(root.WorkspaceComponent);
+  }).call(this);
 
 }).call(this);
 
 (function() {
-  var root,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  var root;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  root.ComponentEquationParser = (function() {
-    ComponentEquationParser.tokenize = function(expression) {
+  root.ComponentEquationParser = class ComponentEquationParser {
+    static tokenize(expression) {
       var length, p, token, tokens;
       tokens = [];
       length = expression && expression.length || 0;
@@ -511,25 +582,25 @@
         tokens.push(token);
       }
       return tokens;
-    };
+    }
 
-    function ComponentEquationParser(expression) {
+    constructor(expression) {
       this.tokens = this.constructor.tokenize(expression);
     }
 
-    ComponentEquationParser.prototype.peek = function() {
+    peek() {
       return this.tokens[0] || null;
-    };
+    }
 
-    ComponentEquationParser.prototype.pop = function() {
+    pop() {
       if (this.tokens.length > 0) {
         return this.tokens.shift();
       } else {
         return null;
       }
-    };
+    }
 
-    ComponentEquationParser.prototype.parse = function(accumulator) {
+    parse(accumulator) {
       var peek, peek_value;
       accumulator || (accumulator = 0);
       peek = this.peek();
@@ -547,125 +618,149 @@
       } else {
         return accumulator;
       }
-    };
-
-    return ComponentEquationParser;
-
-  })();
-
-  root.ResistorCalculatorWorkspace = (function(_super) {
-    __extends(ResistorCalculatorWorkspace, _super);
-
-    function ResistorCalculatorWorkspace() {
-      return ResistorCalculatorWorkspace.__super__.constructor.apply(this, arguments);
     }
 
-    ResistorCalculatorWorkspace.prototype.calculate = function(expression) {
+  };
+
+  // series and parallel resistor calculator
+  root.ResistorCalculatorWorkspace = class ResistorCalculatorWorkspace extends root.WorkspaceComponent {
+    calculate(expression) {
       var parser;
       parser = new root.ComponentEquationParser(expression);
       return parser.parse();
-    };
+    }
 
-    ResistorCalculatorWorkspace.prototype.recalc = function(element) {
+    recalc(element) {
       var req;
       req = this.calculate($('#formula', this.container).val());
       $('#req', this.container).text(req);
       return this.updatePermalink();
-    };
+    }
 
-    ResistorCalculatorWorkspace.prototype.clear = function() {
+    clear() {
       return $('#formula', this.container).val('');
-    };
+    }
 
-    ResistorCalculatorWorkspace.prototype.contextName = function() {
+    contextName() {
       return 'ResistorCalculator';
-    };
+    }
 
-    ResistorCalculatorWorkspace.prototype.bodyTitle = function() {
+    bodyTitle() {
       return "Series and Parallel Resistor Calculator";
-    };
+    }
 
-    ResistorCalculatorWorkspace.prototype.bodyTemplate = function() {
-      return "<p>\n  Enter the formula representing the resistor network.\n  <ul>\n    <li>Add series components with \"+\"</li>\n    <li>Add parallel components with \"|\"</li>\n    <li>Use () to group values</li>\n  </ul>\n</p>\n<form>\n  <div class=\"form-group\">\n    <label for=\"formula\" class=\"control-label\">Resistor network</label>\n    <input type=\"input\" class=\"form-control\" data-trigger=\"recalc\" id=\"formula\" placeholder=\"e.g: 3+10|10|(10+10)\" autocomplete=\"off\">\n  </div>\n  <div class=\"form-group\">\n    <strong>Equivalent resistance:</strong>\n    <span id=\"req\">0</span> &Omega;\n  </div>\n  <div class=\"form-group\">\n    <button class=\"btn btn-default\" data-action=\"clear\">Clear..</button>\n  </div>\n</form>";
-    };
+    bodyTemplate() {
+      return `<p>
+  Enter the formula representing the resistor network.
+  <ul>
+    <li>Add series components with "+"</li>
+    <li>Add parallel components with "|"</li>
+    <li>Use () to group values</li>
+  </ul>
+</p>
+<form>
+  <div class="form-group">
+    <label for="formula" class="control-label">Resistor network</label>
+    <input type="input" class="form-control" data-trigger="recalc" id="formula" placeholder="e.g: 3+10|10|(10+10)" autocomplete="off">
+  </div>
+  <div class="form-group">
+    <strong>Equivalent resistance:</strong>
+    <span id="req">0</span> &Omega;
+  </div>
+  <div class="form-group">
+    <button class="btn btn-default" data-action="clear">Clear..</button>
+  </div>
+</form>`;
+    }
 
-    return ResistorCalculatorWorkspace;
-
-  })(root.WorkspaceComponent);
+  };
 
 }).call(this);
 
 (function() {
-  var root,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  var root;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  root.WebEncoderWorkspace = (function(_super) {
-    __extends(WebEncoderWorkspace, _super);
-
-    function WebEncoderWorkspace() {
-      WebEncoderWorkspace.__super__.constructor.apply(this, arguments);
+  // simple handler of various html/uri encoding tasks
+  root.WebEncoderWorkspace = class WebEncoderWorkspace extends root.WorkspaceComponent {
+    constructor() {
+      super();
       this.outElement = $('#outText', this.container);
       this.inElement = $('#inText', this.container);
     }
 
-    WebEncoderWorkspace.prototype.contextName = function() {
+    contextName() {
       return 'WebEncoder';
-    };
+    }
 
-    WebEncoderWorkspace.prototype.bodyTitle = function() {
+    bodyTitle() {
       return "HTML and URI Encoding";
-    };
+    }
 
-    WebEncoderWorkspace.prototype.bodyTemplate = function() {
-      return "<form id=\"webEncoder\">\n  <div class=\"form-group\">\n    <label for=\"inText\">source</label>\n    <textarea id=\"inText\" class=\"form-control\" rows=6 wrap=\"off\" placeholder=\"enter your text, html or javaScript to convert here\"></textarea>\n  </div>\n  <div class=\"form-group\">\n    <button class=\"btn btn-default\" data-action=\"htmlEncode\">HTML Encode</button>\n    <button class=\"btn btn-default\" data-action=\"encodeURI\">URI Encode</button>\n    <button class=\"btn btn-default\" data-action=\"encodeURIComponent\">URI Encode Component</button>\n    <button class=\"btn btn-default\" data-action=\"uriEscape\">URI Escape</button>\n    <button class=\"btn btn-default\" data-action=\"clearBoth\">Clear..</button>\n  </div>\n  <div class=\"form-group\">\n    <label for=\"outText\">encoded output</label>\n    <textarea id=\"outText\" class=\"form-control\" rows=6 wrap=\"off\"></textarea>\n  </div>\n</form>";
-    };
+    bodyTemplate() {
+      return `<form id="webEncoder">
+  <div class="form-group">
+    <label for="inText">source</label>
+    <textarea id="inText" class="form-control" rows=6 wrap="off" placeholder="enter your text, html or javaScript to convert here"></textarea>
+  </div>
+  <div class="form-group">
+    <button class="btn btn-default" data-action="htmlEncode">HTML Encode</button>
+    <button class="btn btn-default" data-action="encodeURI">URI Encode</button>
+    <button class="btn btn-default" data-action="encodeURIComponent">URI Encode Component</button>
+    <button class="btn btn-default" data-action="uriEscape">URI Escape</button>
+    <button class="btn btn-default" data-action="clearBoth">Clear..</button>
+  </div>
+  <div class="form-group">
+    <label for="outText">encoded output</label>
+    <textarea id="outText" class="form-control" rows=6 wrap="off"></textarea>
+  </div>
+</form>`;
+    }
 
-    WebEncoderWorkspace.prototype.references = function() {
+    references() {
       return [
         {
           href: 'http://old.stevenharman.net/blog/archive/2007/06/16/url-and-html-encoding-on-the-client-javascript-to-the.aspx',
           name: 'URL and HTML Encoding on the Client? JavaScript to the Rescue!'
-        }, {
+        },
+        {
           href: 'http://xkr.us/articles/javascript/encode-compare/',
           name: 'Comparing escape(), encodeURI(), and encodeURIComponent()'
-        }, {
+        },
+        {
           href: 'http://stackoverflow.com/questions/24816/escaping-html-strings-with-jquery',
           name: 'Escaping HTML strings with jQuery'
         }
       ];
-    };
+    }
 
-    WebEncoderWorkspace.prototype.htmlEncode = function() {
+    htmlEncode() {
       this.outElement.val($("<div></div>").text(this.inElement.val()).html());
       return this.recalc();
-    };
+    }
 
-    WebEncoderWorkspace.prototype.encodeURI = function() {
+    encodeURI() {
       this.outElement.val(encodeURI(this.inElement.val()));
       return this.recalc();
-    };
+    }
 
-    WebEncoderWorkspace.prototype.encodeURIComponent = function() {
+    encodeURIComponent() {
       this.outElement.val(encodeURIComponent(this.inElement.val()));
       return this.recalc();
-    };
+    }
 
-    WebEncoderWorkspace.prototype.uriEscape = function() {
+    uriEscape() {
       this.outElement.val(escape(this.inElement.val()));
       return this.recalc();
-    };
+    }
 
-    WebEncoderWorkspace.prototype.clearBoth = function() {
+    clearBoth() {
       this.outElement.val('');
       this.inElement.val('').focus();
       return this.recalc();
-    };
+    }
 
-    return WebEncoderWorkspace;
-
-  })(root.WorkspaceComponent);
+  };
 
 }).call(this);
