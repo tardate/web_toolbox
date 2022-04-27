@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": "https://github.com/tardate/web_toolbox",
   "devDependencies": {
-    "grunt": "^1.4.0",
+    "grunt": "^1.5.2",
     "grunt-contrib-coffee": "^2.1.0",
     "grunt-contrib-jasmine": "^2.2.0",
     "grunt-contrib-uglify": "^5.0.1",
