@@ -1,8 +1,8 @@
 # Web Toolbox
 
-A collection of utilities and calculators related to stuff I'm intersted in.
+A collection of utilities and calculators related to stuff I'm interested in.
 
-This is work in progress - first up, collating bits I had scattered on seperate sites to here.
+This is work in progress - first up, collating bits I had scattered on separate sites to here.
 
 ## Hosting
 
@@ -18,4 +18,4 @@ To watch, compile and test coffeescript..
 Run locally with Sinatra/WEBrick:
 
     bundle install
-    ruby web_app.rb
+    ruby app.rb

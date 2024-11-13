@@ -1,4 +1,4 @@
 node_modules
-.ruby*
-.rvmrc
 .grunt
+package-lock.json
+Gemfile.lock
